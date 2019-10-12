@@ -2,6 +2,12 @@
   "name": "Exonym",
   "id": "763544170659911201",
   "api": "1.0.0",
-  "main": "code.js",
-  "ui": "ui.html"
+  "main": "dist/main.js",
+  "ui": "dist/webview.html",
+  "menu": [
+    {
+      "name": "Do A Thing",
+      "command": "doAThing"
+    }
+  ]
 }
