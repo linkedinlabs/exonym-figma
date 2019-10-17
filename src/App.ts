@@ -65,11 +65,54 @@ export default class App {
     const {
       messenger,
       // page,
-      // selection,
+      selection,
     } = assemble(figma);
 
-    messenger.log('Do a thing.');
-    messenger.toast('A thing, it has been done.');
+    const textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
+
+    const readTypefaces = () => {
+      const typefaces = [];
+      textNodes.forEach((textNode: TextNode) => {
+        console.log(textNode)
+        typefaces.push(textNode.fontName);
+      });
+
+      return typefaces
+    };
+
+    const loadTypefaces = (typefaces: Array<{family: string, style: string}>) => {
+      typefaces.forEach(typeface => figma.loadFontAsync(typeface));
+    }
+
+    const replaceText = () => {
+      textNodes.forEach((textNode) => {
+        let buffer: number = 24;
+        if ((textNode.height / 2) < buffer) {
+          buffer = (textNode.height / 2);
+        }
+        const newTextNode: TextNode = textNode.clone();
+        newTextNode.x = textNode.x + buffer;
+        newTextNode.y = textNode.y + buffer;
+        textNode.parent.appendChild(newTextNode)
+      })
+    }
+
+    const sendMessages = async () => {
+      const typefaces = readTypefaces();
+
+      messenger.log('Do a thing.');
+      messenger.toast('A thing, it has been done.');
+
+      await console.log(typefaces);
+      await loadTypefaces(typefaces);
+      replaceText()
+      console.log('inner')
+      console.log('inner inner')
+    };
+    sendMessages();
+
+    console.log('inner outer')
+
 
     if (this.shouldTerminate) {
       this.closeGUI();

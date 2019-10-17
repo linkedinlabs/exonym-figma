@@ -1,6 +1,6 @@
 // ++++++++++++++++++++++++++ Specter for Figma +++++++++++++++++++++++++++
 import App from './App';
-import { GUI_SETTINGS, TYPEFACES } from './constants';
+import { GUI_SETTINGS } from './constants';
 
 // GUI management -------------------------------------------------
 
@@ -66,10 +66,11 @@ const dispatcher = (action: {
   });
 
   // run the action in the App class based on type
-  const runAction = (actionType: string) => {
+  const runAction = async (actionType: string) => {
     switch (actionType) {
       case 'doAThing':
-        app.doAThing();
+        await console.log('middle')
+        await app.doAThing();
         break;
       default:
         showGUI();
@@ -77,12 +78,12 @@ const dispatcher = (action: {
   };
 
   // load the typeface and then run the action
-  const runActionWithTypefaces = async (actionType: string) => {
-    // typefaces should be loaded before running action
-    await figma.loadFontAsync(TYPEFACES.primary);
+  const runActionAsync = async (actionType: string) => {
+    await console.log('first')
     await runAction(actionType);
+    await console.log('last')
   };
-  runActionWithTypefaces(action.type);
+  runActionAsync(action.type);
 
   return null;
 };
