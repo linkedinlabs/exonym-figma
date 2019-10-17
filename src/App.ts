@@ -72,7 +72,7 @@ export default class App {
     messenger.toast('A thing, it has been done.');
 
     if (this.shouldTerminate) {
-      this.closeGUI(false);
+      this.closeGUI();
     }
     return null;
   }
