@@ -1,4 +1,5 @@
 import Messenger from './Messenger';
+import { asyncForEach } from './Tools';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -71,52 +72,73 @@ export default class App {
     const textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
 
     const readTypefaces = () => {
-      const typefaces = [];
+      const uniqueTypefaces: Array<FontName> = [];
+
       textNodes.forEach((textNode: TextNode) => {
-        console.log(textNode)
-        typefaces.push(textNode.fontName);
+        if (!textNode.hasMissingFont) {
+          const typeface: FontName = textNode.fontName;
+
+          const itemIndex: number = uniqueTypefaces.findIndex(
+            (foundItem: FontName) => (
+              (foundItem.family === typeface.family)
+              && foundItem.style === typeface.style),
+          );
+
+          if (itemIndex < 0) {
+            uniqueTypefaces.push(typeface);
+          }
+        }
       });
 
-      return typefaces
+      return uniqueTypefaces;
     };
 
-    const loadTypefaces = (typefaces: Array<{family: string, style: string}>) => {
-      typefaces.forEach(typeface => figma.loadFontAsync(typeface));
-    }
+    const loadTypefaces = async (typefaces: Array<FontName>) => {
+      messenger.log('begin loading typefaces');
+      await asyncForEach(typefaces, async (typeface: FontName) => {
+        await figma.loadFontAsync(typeface);
+        messenger.log(`loading ${typeface.family} ${typeface.style} typeface`);
+      });
+
+      messenger.log('done loading typefaces');
+    };
 
     const replaceText = () => {
-      textNodes.forEach((textNode) => {
-        let buffer: number = 24;
-        if ((textNode.height / 2) < buffer) {
-          buffer = (textNode.height / 2);
+      messenger.log('begin manipulating text');
+      textNodes.forEach((textNode: TextNode) => {
+        let spacingBuffer: number = 24;
+        if ((textNode.height / 2) < spacingBuffer) {
+          spacingBuffer = (textNode.height / 2);
         }
+        const updatedCharacters: string = `${textNode.characters}… and some more!`;
+
+        // create text node + update characters
         const newTextNode: TextNode = textNode.clone();
-        newTextNode.x = textNode.x + buffer;
-        newTextNode.y = textNode.y + buffer;
-        textNode.parent.appendChild(newTextNode)
-      })
-    }
+        newTextNode.characters = updatedCharacters;
 
-    const sendMessages = async () => {
-      const typefaces = readTypefaces();
+        // placement
+        newTextNode.x = textNode.x + spacingBuffer;
+        newTextNode.y = textNode.y + spacingBuffer;
+        textNode.parent.appendChild(newTextNode);
+      });
+    };
 
+    const close = () => {
+      if (this.shouldTerminate) {
+        this.closeGUI();
+      }
+    };
+
+    const doTheThing = async () => {
+      const typefaces: Array<FontName> = readTypefaces();
+
+      await loadTypefaces(typefaces);
+      replaceText();
       messenger.log('Do a thing.');
       messenger.toast('A thing, it has been done.');
-
-      await console.log(typefaces);
-      await loadTypefaces(typefaces);
-      replaceText()
-      console.log('inner')
-      console.log('inner inner')
+      close();
     };
-    sendMessages();
 
-    console.log('inner outer')
-
-
-    if (this.shouldTerminate) {
-      this.closeGUI();
-    }
-    return null;
+    return doTheThing();
   }
 }
