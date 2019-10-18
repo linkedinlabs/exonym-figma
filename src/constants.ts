@@ -9,7 +9,7 @@
  * @name PLUGIN_IDENTIFIER
  * @type {string}
  */
-const PLUGIN_IDENTIFIER = 'com.linkedin.figma.specter-plugin';
+const PLUGIN_IDENTIFIER = 'com.linkedin.figma.exonym-plugin';
 
 /**
  * @description The public-facing name for the plugin. This should match the

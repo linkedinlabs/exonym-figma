@@ -66,24 +66,17 @@ const dispatcher = (action: {
   });
 
   // run the action in the App class based on type
-  const runAction = async (actionType: string) => {
+  const runAction = (actionType: string) => {
     switch (actionType) {
       case 'doAThing':
-        await console.log('middle')
-        await app.doAThing();
+        app.doAThing();
         break;
       default:
         showGUI();
     }
   };
 
-  // load the typeface and then run the action
-  const runActionAsync = async (actionType: string) => {
-    await console.log('first')
-    await runAction(actionType);
-    await console.log('last')
-  };
-  runActionAsync(action.type);
+  runAction(action.type);
 
   return null;
 };
