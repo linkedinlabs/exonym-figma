@@ -1,5 +1,6 @@
 import Messenger from './Messenger';
 import { asyncForEach } from './Tools';
+import { LANGUAGES } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -136,6 +137,7 @@ export default class App {
       replaceText();
       messenger.log('Do a thing.');
       messenger.toast('A thing, it has been done.');
+      console.log(LANGUAGES); // eslint-disable-line no-console
       close();
     };
 
