@@ -94,6 +94,15 @@ export default class App {
       return uniqueTypefaces;
     };
 
+    const readLanguageTypeface = (languageId: string) => {
+      const languageIndex = LANGUAGES.findIndex(lang => lang.id === languageId);
+      const language = LANGUAGES[languageIndex];
+      if (language && language.font) {
+        return language.font;
+      }
+      return null;
+    };
+
     const loadTypefaces = async (typefaces: Array<FontName>) => {
       messenger.log('begin loading typefaces');
       await asyncForEach(typefaces, async (typeface: FontName) => {
@@ -104,7 +113,7 @@ export default class App {
       messenger.log('done loading typefaces');
     };
 
-    const replaceText = () => {
+    const replaceText = (languageTypeface: FontName) => {
       messenger.log('begin manipulating text');
       textNodes.forEach((textNode: TextNode) => {
         let spacingBuffer: number = 24;
@@ -115,6 +124,7 @@ export default class App {
 
         // create text node + update characters
         const newTextNode: TextNode = textNode.clone();
+        newTextNode.fontName = languageTypeface;
         newTextNode.characters = updatedCharacters;
 
         // placement
@@ -132,9 +142,14 @@ export default class App {
 
     const doTheThing = async () => {
       const typefaces: Array<FontName> = readTypefaces();
+      const languageTypeface = readLanguageTypeface('thai');
+
+      if (languageTypeface) {
+        typefaces.push(languageTypeface);
+      }
 
       await loadTypefaces(typefaces);
-      replaceText();
+      replaceText(languageTypeface);
       messenger.log('Do a thing.');
       messenger.toast('A thing, it has been done.');
       console.log(LANGUAGES); // eslint-disable-line no-console
