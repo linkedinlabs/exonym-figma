@@ -1,5 +1,6 @@
 import Messenger from './Messenger';
-import { asyncForEach } from './Tools';
+import Painter from './Painter';
+import { loadTypefaces, readLanguageTypeface } from './Tools';
 import { LANGUAGES } from './constants';
 
 /**
@@ -66,7 +67,7 @@ export default class App {
   doAThing() {
     const {
       messenger,
-      // page,
+      page,
       selection,
     } = assemble(figma);
 
@@ -94,44 +95,23 @@ export default class App {
       return uniqueTypefaces;
     };
 
-    const readLanguageTypeface = (languageId: string) => {
-      const languageIndex = LANGUAGES.findIndex(lang => lang.id === languageId);
-      const language = LANGUAGES[languageIndex];
-      if (language && language.font) {
-        return language.font;
-      }
-      return null;
-    };
-
-    const loadTypefaces = async (typefaces: Array<FontName>) => {
-      messenger.log('begin loading typefaces');
-      await asyncForEach(typefaces, async (typeface: FontName) => {
-        await figma.loadFontAsync(typeface);
-        messenger.log(`loading ${typeface.family} ${typeface.style} typeface`);
-      });
-
-      messenger.log('done loading typefaces');
-    };
-
-    const replaceText = (languageTypeface: FontName) => {
+    const duplicateOrReplaceText = (
+      languageTypeface?: FontName | null,
+      action: 'duplicate' | 'replace' = 'duplicate',
+    ) => {
       messenger.log('begin manipulating text');
+      const isDuplicate = action === 'duplicate';
       textNodes.forEach((textNode: TextNode) => {
-        let spacingBuffer: number = 24;
-        if ((textNode.height / 2) < spacingBuffer) {
-          spacingBuffer = (textNode.height / 2);
+        // set up Painter instance for the layer
+        const painter = new Painter({ for: textNode, in: page });
+
+        if (isDuplicate) {
+          painter.duplicateText(languageTypeface);
+        } else {
+          painter.replaceText(languageTypeface);
         }
-        const updatedCharacters: string = `${textNode.characters}… and some more!`;
-
-        // create text node + update characters
-        const newTextNode: TextNode = textNode.clone();
-        newTextNode.fontName = languageTypeface;
-        newTextNode.characters = updatedCharacters;
-
-        // placement
-        newTextNode.x = textNode.x + spacingBuffer;
-        newTextNode.y = textNode.y + spacingBuffer;
-        textNode.parent.appendChild(newTextNode);
       });
+      messenger.log('end manipulating text');
     };
 
     const close = () => {
@@ -148,8 +128,11 @@ export default class App {
         typefaces.push(languageTypeface);
       }
 
-      await loadTypefaces(typefaces);
-      replaceText(languageTypeface);
+      await loadTypefaces(typefaces, messenger);
+      // duplicateOrReplaceText(languageTypeface, 'duplicate');
+      duplicateOrReplaceText(null, 'duplicate');
+      // duplicateOrReplaceText(languageTypeface, 'replace');
+      // duplicateOrReplaceText(null, 'replace');
       messenger.log('Do a thing.');
       messenger.toast('A thing, it has been done.');
       console.log(LANGUAGES); // eslint-disable-line no-console
