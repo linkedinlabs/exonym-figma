@@ -64,7 +64,7 @@ const LANGUAGES: Array<{
   {
     name: 'Chinese (Traditional)',
     id: 'chinese-traditional',
-    abbreviation: 'zh',
+    abbreviation: 'zh-CHT',
     font: {
       family: 'Hiragino Kaku Gothic Pro',
       style: 'W3',
@@ -74,7 +74,7 @@ const LANGUAGES: Array<{
   {
     name: 'Chinese (Simplified)',
     id: 'chinese-simplified',
-    abbreviation: 'zh',
+    abbreviation: 'zh-CHS',
     font: {
       family: 'Hiragino Kaku Gothic Pro',
       style: 'W3',
