@@ -78,7 +78,8 @@ export default class App {
 
       textNodes.forEach((textNode: TextNode) => {
         if (!textNode.hasMissingFont) {
-          const typeface: FontName = textNode.fontName;
+          const typefaceOrSymbol: any = textNode.fontName;
+          const typeface: FontName = typefaceOrSymbol;
 
           const itemIndex: number = uniqueTypefaces.findIndex(
             (foundItem: FontName) => (
