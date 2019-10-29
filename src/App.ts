@@ -70,8 +70,13 @@ export default class App {
       page,
       selection,
     } = assemble(figma);
+    const ignoreLocked = true;
+    // const ignoreLocked = false;
 
-    const textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
+    let textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
+    if (ignoreLocked) {
+      textNodes = textNodes.filter((node: SceneNode) => !node.locked);
+    }
 
     const readTypefaces = () => {
       const uniqueTypefaces: Array<FontName> = [];
