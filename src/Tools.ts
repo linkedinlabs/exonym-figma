@@ -5,8 +5,6 @@ import {
   PLUGIN_IDENTIFIER,
 } from './constants';
 
-const hexRgb = require('hex-rgb');
-
 // --- helper functions
 /**
  * @description An approximation of `forEach` but run in an async manner.
@@ -44,6 +42,8 @@ const asyncForEach = async (
  * @param {string} action Constant string representing the action to take (`add` or `remove`).
  *
  * @returns {Object} The modified array.
+
+ * @private
  */
 const updateArray = (
   key: string,
@@ -82,52 +82,6 @@ const updateArray = (
 };
 
 /**
- * @description A helper function to take a hexcolor string, conver it to an object in RGB format,
- * and further convert the `red`, `green`, and `blue` values to a decimal value.
- *
- * @kind function
- * @name hexToDecimalRGB
- * @param {string} hexColor A color in hex format (i.e. `#ffcc00`).
- *
- * @returns {Object} A representation of the original hex color in red, green, and blue (`r`,
- * `g`, `b`) decimal values.
- */
-const hexToDecimalRgb = (hexColor: string): {
-  r: number,
-  g: number,
-  b: number,
-} => {
-  const rgbColor: { red: number, green: number, blue: number } = hexRgb(hexColor);
-
-  const r: number = (rgbColor.red / 255);
-  const g: number = (rgbColor.green / 255);
-  const b: number = (rgbColor.blue / 255);
-
-  const decimalRgb: { r: number, g: number, b: number } = { r, g, b };
-  return decimalRgb;
-};
-
-/**
- * @description Takes a string and converts everything except for the first alpha-letter to
- * lowercase. It also capitalizes the first alpha-letter.
- *
- * @kind function
- * @name toSentenceCase
- * @param {string} anyString String of text to title-case.
- *
- * @returns {string} The title-cased string.
- */
-const toSentenceCase = (anyString: string): string => {
-  const lowerCaseString = anyString.toLowerCase();
-  const titleCaseString = lowerCaseString.replace(
-    /[a-z]/i,
-    firstLetter => firstLetter.toUpperCase(),
-  ).trim();
-
-  return titleCaseString;
-};
-
-/**
  * @description Takes a layer object and traverses parent relationships until the top-level
  * `FRAME_TYPES.main` layer is found. Returns the frame layer.
  *
@@ -147,45 +101,6 @@ const findFrame = (layer: any) => {
     }
   }
   return parent;
-};
-
-/**
- * @description Compensates for a mix of groups and non-groups when determining a
- * layer index. Grouped layers are parsed to a decimal value that includes the final
- * parent Group index.
- *
- * @kind function
- * @name getRelativeIndex
- * @param {Object} layer The Figma layer.
- * @returns {number} The index.
- */
-const getRelativeIndex = (layer): number => {
-  const getIndex = (layerSet, comparisonLayer): number => {
-    const index = layerSet.findIndex(node => node === comparisonLayer);
-    return index;
-  };
-
-  const parentChildren = layer.parent.children;
-  let layerIndex: number = getIndex(parentChildren, layer);
-
-  const innerLayerIndex = layerIndex;
-  let parentGroupIndex: number = null;
-
-  let { parent } = layer;
-  // loop through each parent and adjust the coordinates
-  if (parent) {
-    while (parent.type === FRAME_TYPES.group) {
-      const parentParentChildren = parent.parent.children;
-      parentGroupIndex = getIndex(parentParentChildren, parent);
-      parent = parent.parent; // eslint-disable-line prefer-destructuring
-    }
-
-    if (parentGroupIndex !== null) {
-      layerIndex = parseFloat(`${parentGroupIndex}.${innerLayerIndex}`);
-    }
-  }
-
-  return layerIndex;
 };
 
 /** WIP
@@ -330,13 +245,10 @@ export {
   asyncForEach,
   findFrame,
   getLayerSettings,
-  getRelativeIndex,
-  hexToDecimalRgb,
   isInternal,
   loadTypefaces,
   readLanguageTypeface,
   resizeGUI,
   setLayerSettings,
-  toSentenceCase,
   updateArray,
 };

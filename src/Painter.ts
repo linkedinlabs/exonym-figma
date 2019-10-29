@@ -1,8 +1,4 @@
-import {
-  findFrame,
-  getLayerSettings,
-  hexToDecimalRgb,
-} from './Tools';
+import { findFrame, getLayerSettings } from './Tools';
 import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Figma file
