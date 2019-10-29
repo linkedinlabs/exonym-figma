@@ -70,6 +70,7 @@ export default class App {
       page,
       selection,
     } = assemble(figma);
+    console.log(process.env.MST_API_KEY); // eslint-disable-line no-console
     const ignoreLocked = true;
     // const ignoreLocked = false;
 

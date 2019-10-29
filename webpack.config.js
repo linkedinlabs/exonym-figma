@@ -1,3 +1,4 @@
+const Dotenv = require('dotenv-webpack');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
@@ -36,6 +37,7 @@ module.exports = (env, argv) => ({
 
   // Tells Webpack to generate "webview.html" and to inline "webview.ts" into it
   plugins: [
+    new Dotenv(),
     new HtmlWebpackPlugin({
       template: './src/views/webview.html',
       filename: 'webview.html',
