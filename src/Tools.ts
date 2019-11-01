@@ -28,6 +28,40 @@ const asyncForEach = async (
 };
 
 /**
+ * @description An approximation of `forEach` but run in an async manner.
+ *
+ * @kind function
+ * @name asyncPoll
+ *
+ * @param {Function} externalCheck The external function to run a check against.
+ * The function should resolve to `true`.
+ * @param {Class} messenger An active instance of the Messenger class for logging (optional).
+ *
+ * @returns {Promise} Returns a promise for resolution.
+ */
+ const asyncPoll = (
+   externalCheck: Function,
+   messenger?: { log: Function },
+   name?: string,
+ ): Promise<Function> => {
+   const isReady: Function = externalCheck;
+   const checkName = name || externalCheck.name;
+
+   const checkIsReady = (resolve) => {
+     if (messenger) { messenger.log(`Polling: ${checkName} 🤔`) }
+
+     if (isReady()) {
+       if (messenger) { messenger.log(`Resolve ${checkName} 🙏`) }
+
+       resolve(true);
+     } else {
+       setTimeout(checkIsReady, 200, resolve);
+     }
+   }
+   return new Promise(checkIsReady);
+ };
+
+/**
  * @description A reusable helper function to take an array and add or remove data from it
  * based on a top-level key and a defined action.
  * an action (`add` or `remove`).
@@ -243,6 +277,7 @@ const isInternal = (): boolean => {
 
 export {
   asyncForEach,
+  asyncPoll,
   findFrame,
   getLayerSettings,
   isInternal,

@@ -1,6 +1,10 @@
 import Messenger from './Messenger';
 import Painter from './Painter';
-import { loadTypefaces, readLanguageTypeface } from './Tools';
+import {
+  asyncPoll,
+  loadTypefaces,
+  readLanguageTypeface,
+} from './Tools';
 import { LANGUAGES } from './constants';
 
 /**
@@ -102,6 +106,54 @@ export default class App {
       return uniqueTypefaces;
     };
 
+    const networkRequest = async (requestUrl) => {
+      // set blank response
+      let response = null;
+
+      // we need to wait for the UI to be ready:
+      // network calls are made through the UI iframe
+      const awaitUIReadiness = async () => {
+        // set UI readiness check to falsey
+        let ready = false;
+
+        // simple function to check truthiness of `ready`
+        const isUIReady = () => ready;
+
+        // set a one-time use listener 
+        figma.ui.once("message", msg => {
+          if (msg && msg.loaded) { ready = true; }
+        });
+
+        await asyncPoll(isUIReady, messenger);
+      }
+
+      const awaitResponse = async () => {
+        // simple function to check for existence of a response
+        const responseExists = () => (response !== null);
+
+        // set a one-time use listener 
+        figma.ui.once("message", msg => {
+          if (msg && msg.apiResponse) { response = msg.apiResponse; }
+        });
+
+        await asyncPoll(responseExists, messenger);
+      }
+
+      const makeRequest = () => {
+        figma.ui.postMessage({
+          action: 'networkRequest',
+          payload: { route: requestUrl },
+        });
+      }
+
+      // do the things
+      figma.showUI(__html__, { visible: false });
+      await awaitUIReadiness();
+      makeRequest();
+      await awaitResponse();
+      return response;
+    }
+
     const duplicateOrReplaceText = (
       languageTypeface?: FontName | null,
       action: 'duplicate' | 'replace' = 'duplicate',
@@ -130,12 +182,18 @@ export default class App {
     const doTheThing = async () => {
       const typefaces: Array<FontName> = readTypefaces();
       const languageTypeface = readLanguageTypeface('thai');
+      const url = 'https://jsonplaceholder.typicode.com/todos';
 
       if (languageTypeface) {
         typefaces.push(languageTypeface);
       }
 
       await loadTypefaces(typefaces, messenger);
+      const data = await networkRequest(url);
+      if (data) {
+        console.log('we have data')
+        console.log(data);
+      }
       // duplicateOrReplaceText(languageTypeface, 'duplicate');
       duplicateOrReplaceText(null, 'duplicate');
       // duplicateOrReplaceText(languageTypeface, 'replace');

@@ -28,7 +28,19 @@ if (actionsElement) {
 }
 
 /* process Messages from the plugin */
-
+const makeNetworkRequest = (route: string) => {
+  fetch(route)
+    .then(response => {
+      response.json()
+      .then(json => {
+        if (json) {
+          // return json blob back to main thread
+          window.parent.postMessage({ pluginMessage: { apiResponse: json } }, '*');
+        }
+      })
+    })
+    .catch(err => console.error(err))
+}
 
 /* watch for Messages from the plugin */
 onmessage = ( // eslint-disable-line no-undef
@@ -47,9 +59,12 @@ onmessage = ( // eslint-disable-line no-undef
     case 'doAThing':
       console.log('a thing'); // eslint-disable-line no-console
       break;
+    case 'networkRequest':
+      makeNetworkRequest(pluginMessage.payload.route);
+      break;
     default:
       return null;
   }
-
-  return null;
 };
+
+window.parent.postMessage({ pluginMessage: { loaded: true } }, '*')
