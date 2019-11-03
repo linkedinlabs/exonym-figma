@@ -31,7 +31,7 @@ const asyncForEach = async (
  * @description An approximation of `forEach` but run in an async manner.
  *
  * @kind function
- * @name asyncPoll
+ * @name pollWithPromise
  *
  * @param {Function} externalCheck The external function to run a check against.
  * The function should resolve to `true`.
@@ -39,27 +39,148 @@ const asyncForEach = async (
  *
  * @returns {Promise} Returns a promise for resolution.
  */
- const asyncPoll = (
-   externalCheck: Function,
-   messenger?: { log: Function },
-   name?: string,
- ): Promise<Function> => {
-   const isReady: Function = externalCheck;
-   const checkName = name || externalCheck.name;
+const pollWithPromise = (
+  externalCheck: Function,
+  messenger?: { log: Function },
+  name?: string,
+): Promise<Function> => {
+  const isReady: Function = externalCheck;
+  const checkName = name || externalCheck.name;
 
-   const checkIsReady = (resolve) => {
-     if (messenger) { messenger.log(`Polling: ${checkName} 🤔`) }
+  const checkIsReady = (resolve) => {
+    if (messenger) { messenger.log(`Checking: ${checkName} 🤔`); }
 
-     if (isReady()) {
-       if (messenger) { messenger.log(`Resolve ${checkName} 🙏`) }
+    if (isReady()) {
+      if (messenger) { messenger.log(`Resolve ${checkName} 🙏`); }
 
-       resolve(true);
-     } else {
-       setTimeout(checkIsReady, 200, resolve);
-     }
-   }
-   return new Promise(checkIsReady);
- };
+      resolve(true);
+    } else {
+      setTimeout(checkIsReady, 200, resolve);
+    }
+  };
+  return new Promise(checkIsReady);
+};
+
+/** WIP
+ * @description An approximation of `forEach` but run in an async manner.
+ *
+ * @kind function
+ * @name asyncNetworkRequest
+ *
+ * @param {Function} externalCheck The external function to run a check against.
+ * The function should resolve to `true`.
+ * @param {Class} messenger An active instance of the Messenger class for logging (optional).
+ *
+ * @returns {Promise} Returns a promise for resolution.
+ */
+const asyncNetworkRequest = async (options: {
+  requestUrl: string,
+  headers?: any,
+  bodyToSend?: any,
+  messenger?: { log: Function },
+}) => {
+  const {
+    requestUrl,
+    headers,
+    bodyToSend,
+    messenger,
+  } = options;
+
+  // set blank response
+  let response = null;
+
+  // we need to wait for the UI to be ready:
+  // network calls are made through the UI iframe
+  const awaitUIReadiness = async () => {
+    // set UI readiness check to falsey
+    let ready = false;
+
+    // simple function to check truthiness of `ready`
+    const isUIReady = () => ready;
+
+    // set a one-time use listener
+    figma.ui.once('message', (msg) => {
+      if (msg && msg.loaded) { ready = true; }
+    });
+
+    await pollWithPromise(isUIReady, messenger);
+  };
+
+  const awaitResponse = async () => {
+    // simple function to check for existence of a response
+    const responseExists = () => (response !== null);
+
+    // set a one-time use listener
+    figma.ui.once('message', (msg) => {
+      if (msg && msg.apiResponse) { response = msg.apiResponse; }
+    });
+
+    await pollWithPromise(responseExists, messenger);
+  };
+
+  const makeRequest = () => {
+    figma.ui.postMessage({
+      action: 'networkRequest',
+      payload: {
+        route: requestUrl,
+        headers,
+        bodyToSend,
+      },
+    });
+  };
+
+  // do the things
+  figma.showUI(__html__, { visible: false }); // eslint-disable-line no-undef
+  await awaitUIReadiness();
+  makeRequest();
+  await awaitResponse();
+  return response;
+};
+
+/** WIP
+ * @description A reusable helper function to take an array and add or remove data from it
+ * based on a top-level key and a defined action.
+ * an action (`add` or `remove`).
+ *
+ * @kind function
+ * @name updateArray
+ *
+ * @param {string} key String representing the top-level area of the array to modify.
+ * @param {Object} item Object containing the new bit of data to add or
+ * remove (must include an `id` string for comparison).
+ * @param {Array} array The array to be modified.
+ * @param {string} action Constant string representing the action to take (`add` or `remove`).
+ *
+ * @returns {Object} The modified array.
+
+ * @private
+ */
+const makeNetworkRequest = (options: {
+  route: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  headers?: any,
+  bodyToSend?: any,
+}) => {
+  const { route, headers, bodyToSend } = options;
+  const body = bodyToSend ? JSON.stringify(bodyToSend) : null;
+  const method = options.method || 'POST';
+
+  fetch(route, { // eslint-disable-line no-undef
+    method,
+    headers,
+    body,
+  })
+    .then((response) => {
+      response.json()
+        .then((json) => {
+          if (json) {
+            // return json blob back to main thread
+            parent.postMessage({ pluginMessage: { apiResponse: json } }, '*');
+          }
+        });
+    })
+    .catch(err => console.error(err)); // eslint-disable-line no-console
+};
 
 /**
  * @description A reusable helper function to take an array and add or remove data from it
@@ -277,11 +398,13 @@ const isInternal = (): boolean => {
 
 export {
   asyncForEach,
-  asyncPoll,
+  asyncNetworkRequest,
   findFrame,
   getLayerSettings,
   isInternal,
   loadTypefaces,
+  makeNetworkRequest,
+  pollWithPromise,
   readLanguageTypeface,
   resizeGUI,
   setLayerSettings,
