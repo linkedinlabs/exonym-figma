@@ -5,7 +5,6 @@ import {
   loadTypefaces,
   readLanguageTypefaces,
 } from './Tools';
-import { LANGUAGES } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -134,6 +133,57 @@ export default class App {
       messenger.log('end manipulating text');
     };
 
+    const commitTranslationsToLayers = (
+      translations:
+        Array<{
+          translations: [{
+            text: string,
+            to: string,
+          }],
+        }>,
+    ): void => {
+      // check for changes to the original text and reset, if necessary
+      const setResetSettings = (textNode: TextNode): void => {
+        const originalText = JSON.parse(textNode.getPluginData('originalText') || null);
+
+        if (!originalText || originalText !== textNode.characters) {
+          // set/update original text
+          textNode.setPluginData(
+            'originalText',
+            JSON.stringify(textNode.characters),
+          );
+
+          // invalidate any existing translations
+          textNode.setPluginData(
+            'translations',
+            JSON.stringify({}),
+          );
+        }
+      };
+
+      // iterrate selection and add translations to layer node settings
+      textNodes.forEach((textNode: TextNode, index: number) => {
+        // first check if we need to reset the layer's settings
+        setResetSettings(textNode);
+
+        // read existing translations for the layer
+        const existingTranslations = JSON.parse(textNode.getPluginData('translations'));
+
+        // set or update translations
+        translations[index].translations.forEach((translation) => {
+          existingTranslations[translation.to] = translation.text;
+        });
+
+        // save the translations on the layer settings
+        textNode.setPluginData(
+          'translations',
+          JSON.stringify(existingTranslations),
+        );
+      });
+
+      return null;
+    };
+
     const close = () => {
       if (this.shouldTerminate) {
         this.closeGUI();
@@ -141,7 +191,7 @@ export default class App {
     };
 
     const doTheThing = async () => {
-      const targetLanguages: Array<string> = ['ru', 'es', 'ja', 'zh-CHS'];
+      const targetLanguages: Array<string> = ['it', 'ru', 'es', 'ja', 'zh-Hans'];
       const typefaces: Array<FontName> = readTypefaces();
       const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
       const textToTranslate: Array<{ text: string }> = readText();
@@ -170,17 +220,23 @@ export default class App {
 
       if (data) {
         console.log(data); // eslint-disable-line no-console
+
+        // set new translations to the layer's settings
+        commitTranslationsToLayers(data);
+
+        // duplicateOrReplaceText(languageTypeface, 'duplicate');
+        duplicateOrReplaceText(null, 'duplicate');
+        // duplicateOrReplaceText(languageTypeface, 'replace');
+        // duplicateOrReplaceText(null, 'replace');
+
+        messenger.log('Do a thing.');
+        messenger.toast('A thing, it has been done.');
+      } else {
+        messenger.log('A thing could not be done.', 'error');
+        messenger.toast('Unfortunately, a thing could not be done.');
       }
 
-      // duplicateOrReplaceText(languageTypeface, 'duplicate');
-      duplicateOrReplaceText(null, 'duplicate');
-      // duplicateOrReplaceText(languageTypeface, 'replace');
-      // duplicateOrReplaceText(null, 'replace');
-
-      messenger.log('Do a thing.');
-      messenger.toast('A thing, it has been done.');
-      console.log(LANGUAGES); // eslint-disable-line no-console
-      // close();
+      close();
     };
 
     return doTheThing();
