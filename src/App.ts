@@ -1,7 +1,7 @@
 import Messenger from './Messenger';
 import Painter from './Painter';
 import {
-  asyncPoll,
+  asyncNetworkRequest,
   loadTypefaces,
   readLanguageTypeface,
 } from './Tools';
@@ -74,7 +74,6 @@ export default class App {
       page,
       selection,
     } = assemble(figma);
-    console.log(process.env.MST_API_KEY); // eslint-disable-line no-console
     const ignoreLocked = true;
     // const ignoreLocked = false;
 
@@ -106,53 +105,15 @@ export default class App {
       return uniqueTypefaces;
     };
 
-    const networkRequest = async (requestUrl) => {
-      // set blank response
-      let response = null;
+    const readText = () => {
+      const textToTranslate: Array<{ text: string }> = [];
 
-      // we need to wait for the UI to be ready:
-      // network calls are made through the UI iframe
-      const awaitUIReadiness = async () => {
-        // set UI readiness check to falsey
-        let ready = false;
+      textNodes.forEach((textNode: TextNode) => {
+        textToTranslate.push({ text: textNode.characters });
+      });
 
-        // simple function to check truthiness of `ready`
-        const isUIReady = () => ready;
-
-        // set a one-time use listener 
-        figma.ui.once("message", msg => {
-          if (msg && msg.loaded) { ready = true; }
-        });
-
-        await asyncPoll(isUIReady, messenger);
-      }
-
-      const awaitResponse = async () => {
-        // simple function to check for existence of a response
-        const responseExists = () => (response !== null);
-
-        // set a one-time use listener 
-        figma.ui.once("message", msg => {
-          if (msg && msg.apiResponse) { response = msg.apiResponse; }
-        });
-
-        await asyncPoll(responseExists, messenger);
-      }
-
-      const makeRequest = () => {
-        figma.ui.postMessage({
-          action: 'networkRequest',
-          payload: { route: requestUrl },
-        });
-      }
-
-      // do the things
-      figma.showUI(__html__, { visible: false });
-      await awaitUIReadiness();
-      makeRequest();
-      await awaitResponse();
-      return response;
-    }
+      return textToTranslate;
+    };
 
     const duplicateOrReplaceText = (
       languageTypeface?: FontName | null,
@@ -180,24 +141,40 @@ export default class App {
     };
 
     const doTheThing = async () => {
+      const targetLanguages: Array<string> = ['ru', 'es'];
       const typefaces: Array<FontName> = readTypefaces();
-      const languageTypeface = readLanguageTypeface('thai');
-      const url = 'https://jsonplaceholder.typicode.com/todos';
+      const textToTranslate: Array<{ text: string }> = readText();
+      const languageTypeface: FontName = readLanguageTypeface('thai');
+
+      // set up API call
+      const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
+      const url: string = `${baseUrl}&to=${targetLanguages.join(',')}`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
+      };
 
       if (languageTypeface) {
         typefaces.push(languageTypeface);
       }
 
       await loadTypefaces(typefaces, messenger);
-      const data = await networkRequest(url);
+      const data = await asyncNetworkRequest({
+        requestUrl: url,
+        headers,
+        bodyToSend: textToTranslate,
+        messenger,
+      });
+
       if (data) {
-        console.log('we have data')
-        console.log(data);
+        console.log(data); // eslint-disable-line no-console
       }
+
       // duplicateOrReplaceText(languageTypeface, 'duplicate');
       duplicateOrReplaceText(null, 'duplicate');
       // duplicateOrReplaceText(languageTypeface, 'replace');
       // duplicateOrReplaceText(null, 'replace');
+
       messenger.log('Do a thing.');
       messenger.toast('A thing, it has been done.');
       console.log(LANGUAGES); // eslint-disable-line no-console
