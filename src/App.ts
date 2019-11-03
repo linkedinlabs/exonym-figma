@@ -3,7 +3,7 @@ import Painter from './Painter';
 import {
   asyncNetworkRequest,
   loadTypefaces,
-  readLanguageTypeface,
+  readLanguageTypefaces,
 } from './Tools';
 import { LANGUAGES } from './constants';
 
@@ -141,10 +141,16 @@ export default class App {
     };
 
     const doTheThing = async () => {
-      const targetLanguages: Array<string> = ['ru', 'es'];
+      const targetLanguages: Array<string> = ['ru', 'es', 'ja', 'zh-CHS'];
       const typefaces: Array<FontName> = readTypefaces();
+      const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
       const textToTranslate: Array<{ text: string }> = readText();
-      const languageTypeface: FontName = readLanguageTypeface('thai');
+
+      // load typefaces
+      if (languageTypefaces) {
+        languageTypefaces.forEach(languageTypeface => typefaces.push(languageTypeface));
+      }
+      await loadTypefaces(typefaces, messenger);
 
       // set up API call
       const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
@@ -154,11 +160,7 @@ export default class App {
         'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
       };
 
-      if (languageTypeface) {
-        typefaces.push(languageTypeface);
-      }
-
-      await loadTypefaces(typefaces, messenger);
+      // make API call
       const data = await asyncNetworkRequest({
         requestUrl: url,
         headers,
@@ -178,7 +180,7 @@ export default class App {
       messenger.log('Do a thing.');
       messenger.toast('A thing, it has been done.');
       console.log(LANGUAGES); // eslint-disable-line no-console
-      close();
+      // close();
     };
 
     return doTheThing();

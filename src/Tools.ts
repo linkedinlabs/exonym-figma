@@ -283,20 +283,33 @@ const loadTypefaces = async (typefaces: Array<FontName>, messenger?: any) => {
  * @description An approximation of `forEach` but run in an async manner.
  *
  * @kind function
- * @name readLanguageTypeface
+ * @name readLanguageTypefaces
  *
  * @param {Array} array An array to iterate.
  * @param {Function} callback A function to feed the single/iterated item back to.
  *
  * @returns {null} Runs the callback function.
  */
-const readLanguageTypeface = (languageId: string) => {
-  const languageIndex = LANGUAGES.findIndex(lang => lang.id === languageId);
-  const language = LANGUAGES[languageIndex];
-  if (language && language.font) {
-    return language.font;
-  }
-  return null;
+const readLanguageTypefaces = (languageIdArray: Array<string>): Array<FontName> => {
+  const uniqueTypefaces: Array<FontName> = [];
+
+  languageIdArray.forEach((languageId) => {
+    const languageIndex = LANGUAGES.findIndex(lang => lang.id === languageId);
+    const language = LANGUAGES[languageIndex];
+    if (language && language.font) {
+      const itemIndex: number = uniqueTypefaces.findIndex(
+        (foundItem: FontName) => (
+          (foundItem.family === language.font.family)
+          && foundItem.style === language.font.style),
+      );
+
+      if (itemIndex < 0) {
+        uniqueTypefaces.push(language.font);
+      }
+    }
+  });
+
+  return uniqueTypefaces;
 };
 
 /**
@@ -405,7 +418,7 @@ export {
   loadTypefaces,
   makeNetworkRequest,
   pollWithPromise,
-  readLanguageTypeface,
+  readLanguageTypefaces,
   resizeGUI,
   setLayerSettings,
   updateArray,
