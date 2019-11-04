@@ -1,5 +1,4 @@
-import { findFrame, getLayerSettings } from './Tools';
-import { PLUGIN_IDENTIFIER, PLUGIN_NAME } from './constants';
+import { findFrame } from './Tools';
 
 // --- private functions for drawing/positioning annotation elements in the Figma file
 // TKTK
@@ -52,32 +51,60 @@ export default class Painter {
       },
     };
 
-    // TKTK
-    // const layerSettings = getLayerSettings(this.page, this.layer.id);
+    const existingTranslations = JSON.parse(this.layer.getPluginData('translations'));
 
-    // if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
-    //   result.status = 'error';
-    //   result.messages.log = 'Layer missing annotationText';
-    //   return result;
+    if (!existingTranslations) {
+      result.status = 'error';
+      result.messages.log = 'Layer missing translations';
+      return result;
+    }
+
+    let spacingBuffer: number = 56;
+    if ((this.layer.height / (1.5)) < spacingBuffer) {
+      spacingBuffer = (this.layer.height / (1.5));
+    }
+    // const updatedCharacters: string = `${this.layer.characters}… and some more!`;
+
+    console.log(existingTranslations); // eslint-disable-line no-console
+
+    let currentSpacingBuffer = spacingBuffer;
+    const translationsArray = Object.keys(existingTranslations).map(
+      i => [i, existingTranslations[i]],
+    );
+    translationsArray.forEach((translation) => {
+      console.log(translation); // eslint-disable-line no-console
+
+      const language = 0;
+      const text = 1;
+      const updatedCharacters: string = translation[text];
+
+      // create text node + update characters
+      const newTextNode: TextNode = this.layer.clone();
+      if (languageTypeface) {
+        newTextNode.fontName = languageTypeface;
+      }
+      newTextNode.characters = updatedCharacters;
+
+      // placement
+      newTextNode.x = this.layer.x + currentSpacingBuffer;
+      newTextNode.y = this.layer.y + currentSpacingBuffer;
+      newTextNode.name = `${translation[language]}: ${newTextNode.name}`;
+      this.layer.parent.appendChild(newTextNode);
+
+      currentSpacingBuffer += spacingBuffer;
+    });
+
+    // // create text node + update characters
+    // const newTextNode: TextNode = this.layer.clone();
+    // if (languageTypeface) {
+    //   newTextNode.fontName = languageTypeface;
     // }
+    // newTextNode.characters = updatedCharacters;
 
-    let spacingBuffer: number = 24;
-    if ((this.layer.height / 2) < spacingBuffer) {
-      spacingBuffer = (this.layer.height / 2);
-    }
-    const updatedCharacters: string = `${this.layer.characters}… and some more!`;
-
-    // create text node + update characters
-    const newTextNode: TextNode = this.layer.clone();
-    if (languageTypeface) {
-      newTextNode.fontName = languageTypeface;
-    }
-    newTextNode.characters = updatedCharacters;
-
-    // placement
-    newTextNode.x = this.layer.x + spacingBuffer;
-    newTextNode.y = this.layer.y + spacingBuffer;
-    this.layer.parent.appendChild(newTextNode);
+    // // placement
+    // newTextNode.x = this.layer.x + spacingBuffer;
+    // newTextNode.y = this.layer.y + spacingBuffer;
+    // this.layer.parent.appendChild(newTextNode);
 
     // // update the `newPageSettings` array TKTK
     // let newPageSettings = JSON.parse(this.page.getPluginData(PLUGIN_IDENTIFIER) || null);
