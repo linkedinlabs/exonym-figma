@@ -156,7 +156,7 @@ export default class App {
           // invalidate any existing translations
           textNode.setPluginData(
             'translations',
-            JSON.stringify({}),
+            JSON.stringify([]),
           );
         }
       };
@@ -170,8 +170,27 @@ export default class App {
         const existingTranslations = JSON.parse(textNode.getPluginData('translations'));
 
         // set or update translations
-        translations[index].translations.forEach((translation) => {
-          existingTranslations[translation.to] = translation.text;
+        translations[index].translations.forEach((translation: {
+          text: string,
+          to: string,
+          painted?: boolean,
+        }) => {
+          let updated = false;
+          // existingTranslations[translation.to] = translation.text;
+          existingTranslations.forEach((existingTranslation) => {
+            if (existingTranslation.to === translation.to) {
+              // update text
+              existingTranslation.text = translation.text; // eslint-disable-line no-param-reassign
+              // set painting flag
+              existingTranslation.painted = false; // eslint-disable-line no-param-reassign
+              updated = true;
+            }
+          });
+
+          if (!updated) {
+            translation.painted = false; // eslint-disable-line no-param-reassign
+            existingTranslations.push(translation);
+          }
         });
 
         // save the translations on the layer settings
@@ -219,7 +238,7 @@ export default class App {
       });
 
       if (data) {
-        console.log(data); // eslint-disable-line no-console
+        // console.log(data); // eslint-disable-line no-console
 
         // set new translations to the layer's settings
         commitTranslationsToLayers(data);

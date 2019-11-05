@@ -51,32 +51,57 @@ export default class Painter {
       },
     };
 
+    // TKTK move to Tools
+    const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remove' = 'add') => {
+      let updatedArray = array;
+
+      // find the index of a pre-existing `id` match on the array
+      const itemIndex: number = updatedArray.findIndex(
+        foundItem => (foundItem[itemKey] === item[itemKey]),
+      );
+
+      // if a match exists, remove it
+      // even if the action is `add`, always remove the existing entry to prevent duplicates
+      if (itemIndex > -1) {
+        updatedArray = [
+          ...updatedArray.slice(0, itemIndex),
+          ...updatedArray.slice(itemIndex + 1),
+        ];
+      }
+
+      // if the `action` is `add` (or update), append the new `item` to the array
+      if (action === 'add') {
+        updatedArray.push(item);
+      }
+
+      return updatedArray;
+    };
+
+    // load list of translations for the layer from Settings
     const existingTranslations = JSON.parse(this.layer.getPluginData('translations'));
 
+    // if there are no translations, return with error
     if (!existingTranslations) {
       result.status = 'error';
-      result.messages.log = 'Layer missing translations';
+      result.messages.log = 'Layer is missing translations';
       return result;
     }
 
+    // isolate the translations that need to be added
+    // only unpainted items should be drawn
+    const unpaintedTranslations = existingTranslations.filter(translation => !translation.painted);
+    let updatedTranslations = existingTranslations;
+
+    // set up initial layer spacing
     let spacingBuffer: number = 56;
     if ((this.layer.height / (1.5)) < spacingBuffer) {
       spacingBuffer = (this.layer.height / (1.5));
     }
-    // const updatedCharacters: string = `${this.layer.characters}… and some more!`;
-
-    console.log(existingTranslations); // eslint-disable-line no-console
-
     let currentSpacingBuffer = spacingBuffer;
-    const translationsArray = Object.keys(existingTranslations).map(
-      i => [i, existingTranslations[i]],
-    );
-    translationsArray.forEach((translation) => {
-      console.log(translation); // eslint-disable-line no-console
 
-      const language = 0;
-      const text = 1;
-      const updatedCharacters: string = translation[text];
+    // clone the initial layer and update the text with the translation
+    unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
+      const updatedCharacters: string = translation.text;
 
       // create text node + update characters
       const newTextNode: TextNode = this.layer.clone();
@@ -88,38 +113,18 @@ export default class Painter {
       // placement
       newTextNode.x = this.layer.x + currentSpacingBuffer;
       newTextNode.y = this.layer.y + currentSpacingBuffer;
-      newTextNode.name = `${translation[language]}: ${newTextNode.name}`;
+      newTextNode.name = `${translation.to}: ${newTextNode.name}`;
       this.layer.parent.appendChild(newTextNode);
 
       currentSpacingBuffer += spacingBuffer;
+
+      // flip the painted flag + update the overall array
+      translation.painted = true; // eslint-disable-line no-param-reassign
+      updatedTranslations = updateArray(updatedTranslations, translation, 'to');
     });
 
-    // // create text node + update characters
-    // const newTextNode: TextNode = this.layer.clone();
-    // if (languageTypeface) {
-    //   newTextNode.fontName = languageTypeface;
-    // }
-    // newTextNode.characters = updatedCharacters;
-
-    // // placement
-    // newTextNode.x = this.layer.x + spacingBuffer;
-    // newTextNode.y = this.layer.y + spacingBuffer;
-    // this.layer.parent.appendChild(newTextNode);
-
-    // // update the `newPageSettings` array TKTK
-    // let newPageSettings = JSON.parse(this.page.getPluginData(PLUGIN_IDENTIFIER) || null);
-    // newPageSettings = updateArray(
-    //   'annotatedLayers',
-    //   newAnnotatedLayerSet,
-    //   newPageSettings,
-    //   'add',
-    // );
-
-    // // commit the `Settings` update
-    // this.page.setPluginData(
-    //   PLUGIN_IDENTIFIER,
-    //   JSON.stringify(newPageSettings),
-    // );
+    // commit updated list of translations to Settings
+    this.layer.setPluginData('translations', JSON.stringify(updatedTranslations));
 
     // return a successful result
     result.status = 'success';
