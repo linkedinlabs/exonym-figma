@@ -1,4 +1,7 @@
 import Messenger from './Messenger';
+import Painter from './Painter';
+import { loadTypefaces, readLanguageTypeface } from './Tools';
+import { LANGUAGES } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -64,16 +67,84 @@ export default class App {
   doAThing() {
     const {
       messenger,
-      // page,
-      // selection,
+      page,
+      selection,
     } = assemble(figma);
+    const ignoreLocked = true;
+    // const ignoreLocked = false;
 
-    messenger.log('Do a thing.');
-    messenger.toast('A thing, it has been done.');
-
-    if (this.shouldTerminate) {
-      this.closeGUI(false);
+    let textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
+    if (ignoreLocked) {
+      textNodes = textNodes.filter((node: SceneNode) => !node.locked);
     }
-    return null;
+
+    const readTypefaces = () => {
+      const uniqueTypefaces: Array<FontName> = [];
+
+      textNodes.forEach((textNode: TextNode) => {
+        if (!textNode.hasMissingFont) {
+          const typefaceOrSymbol: any = textNode.fontName;
+          const typeface: FontName = typefaceOrSymbol;
+
+          const itemIndex: number = uniqueTypefaces.findIndex(
+            (foundItem: FontName) => (
+              (foundItem.family === typeface.family)
+              && foundItem.style === typeface.style),
+          );
+
+          if (itemIndex < 0) {
+            uniqueTypefaces.push(typeface);
+          }
+        }
+      });
+
+      return uniqueTypefaces;
+    };
+
+    const duplicateOrReplaceText = (
+      languageTypeface?: FontName | null,
+      action: 'duplicate' | 'replace' = 'duplicate',
+    ) => {
+      messenger.log('begin manipulating text');
+      const isDuplicate = action === 'duplicate';
+      textNodes.forEach((textNode: TextNode) => {
+        // set up Painter instance for the layer
+        const painter = new Painter({ for: textNode, in: page });
+
+        if (isDuplicate) {
+          painter.duplicateText(languageTypeface);
+        } else {
+          painter.replaceText(languageTypeface);
+        }
+      });
+      messenger.log('end manipulating text');
+    };
+
+    const close = () => {
+      if (this.shouldTerminate) {
+        this.closeGUI();
+      }
+    };
+
+    const doTheThing = async () => {
+      const typefaces: Array<FontName> = readTypefaces();
+      const languageTypeface = readLanguageTypeface('thai');
+
+      if (languageTypeface) {
+        typefaces.push(languageTypeface);
+      }
+
+      await loadTypefaces(typefaces, messenger);
+      // duplicateOrReplaceText(languageTypeface, 'duplicate');
+      duplicateOrReplaceText(null, 'duplicate');
+      // duplicateOrReplaceText(languageTypeface, 'replace');
+      // duplicateOrReplaceText(null, 'replace');
+      messenger.log('Do a thing.');
+      messenger.toast('A thing, it has been done.');
+      console.log(LANGUAGES); // eslint-disable-line no-console
+      close();
+    };
+
+    return doTheThing();
   }
 }
