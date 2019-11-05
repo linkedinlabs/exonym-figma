@@ -1,10 +1,31 @@
 import {
   FRAME_TYPES,
   GUI_SETTINGS,
+  LANGUAGES,
   PLUGIN_IDENTIFIER,
 } from './constants';
 
 // --- helper functions
+/**
+ * @description An approximation of `forEach` but run in an async manner.
+ *
+ * @kind function
+ * @name asyncForEach
+ *
+ * @param {Array} array An array to iterate.
+ * @param {Function} callback A function to feed the single/iterated item back to.
+ *
+ * @returns {null} Runs the callback function.
+ */
+const asyncForEach = async (
+  array: Array<any>,
+  callback: Function,
+): Promise<Function> => {
+  for (let index = 0; index < array.length; index += 1) {
+    await callback(array[index], index, array); // eslint-disable-line no-await-in-loop
+  }
+  return null;
+};
 
 /**
  * @description A reusable helper function to take an array and add or remove data from it
@@ -21,6 +42,7 @@ import {
  * @param {string} action Constant string representing the action to take (`add` or `remove`).
  *
  * @returns {Object} The modified array.
+
  * @private
  */
 const updateArray = (
@@ -79,6 +101,47 @@ const findFrame = (layer: any) => {
     }
   }
   return parent;
+};
+
+/** WIP
+ * @description An approximation of `forEach` but run in an async manner.
+ *
+ * @kind function
+ * @name loadTypefaces
+ *
+ * @param {Array} array An array to iterate.
+ * @param {Function} callback A function to feed the single/iterated item back to.
+ *
+ * @returns {null} Runs the callback function.
+ */
+const loadTypefaces = async (typefaces: Array<FontName>, messenger?: any) => {
+  messenger.log('begin loading typefaces');
+  await asyncForEach(typefaces, async (typeface: FontName) => {
+    await figma.loadFontAsync(typeface);
+    messenger.log(`loading ${typeface.family} ${typeface.style} typeface`);
+  });
+
+  messenger.log('done loading typefaces');
+};
+
+/** WIP
+ * @description An approximation of `forEach` but run in an async manner.
+ *
+ * @kind function
+ * @name readLanguageTypeface
+ *
+ * @param {Array} array An array to iterate.
+ * @param {Function} callback A function to feed the single/iterated item back to.
+ *
+ * @returns {null} Runs the callback function.
+ */
+const readLanguageTypeface = (languageId: string) => {
+  const languageIndex = LANGUAGES.findIndex(lang => lang.id === languageId);
+  const language = LANGUAGES[languageIndex];
+  if (language && language.font) {
+    return language.font;
+  }
+  return null;
 };
 
 /**
@@ -179,9 +242,12 @@ const isInternal = (): boolean => {
 };
 
 export {
+  asyncForEach,
   findFrame,
   getLayerSettings,
   isInternal,
+  loadTypefaces,
+  readLanguageTypeface,
   resizeGUI,
   setLayerSettings,
   updateArray,
