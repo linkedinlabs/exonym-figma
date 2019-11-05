@@ -35,10 +35,9 @@ export default class Messenger {
   log(message: string, type: 'normal' | 'error' = 'normal') {
     const logType = type === 'error' ? '🌍🆘' : '🌍';
     const pageIdString = this.page ? ` ${this.page.id} :` : '';
-    const eventTypeString = this.event && this.event.action ? ` ${this.event.action} :` : ' Invoked :';
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${PLUGIN_NAME} ${logType}${pageIdString}${eventTypeString} ${message}`); // eslint-disable-line no-console
+      console.log(`${PLUGIN_NAME} ${logType}${pageIdString} ${message}`); // eslint-disable-line no-console
     }
   }
 
