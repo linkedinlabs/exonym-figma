@@ -1,0 +1,56 @@
+{
+  "name": "exonym-figma",
+  "description": "A Figma plugin for easily translating text.",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linkedinlabs/exonym-figma.git"
+  },
+  "scripts": {
+    "build": "npx webpack --mode=production",
+    "build:public": "npx webpack --env.featureset=public --mode=production",
+    "build:internal": "npx webpack --env.featureset=internal --mode=production",
+    "watch": "npx webpack --mode=development --watch",
+    "watch:public": "npx webpack --env.featureset=public --mode=development --watch",
+    "watch:internal": "npx webpack --env.featureset=internal --mode=development --watch",
+    "start": "npm run watch",
+    "start:public": "npm run watch:public",
+    "start:internal": "npm run watch:internal",
+    "postinstall": "npm run build",
+    "lint": "npm run lint:js",
+    "lint:eslint": "eslint . --ext .js,.tsx,.ts",
+    "lint:stylelint": "stylelint './**/*.css'",
+    "lint:js": "npm run lint:eslint",
+    "lint:css": "npm run lint:stylelint",
+    "lint:staged": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,tsx,ts}": "eslint",
+    "*.{css,scss}": "stylelint"
+  },
+  "pre-commit": "lint:staged",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
+    "css-loader": "^1.0.1",
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-jsdoc": "^4.8.4",
+    "html-loader": "^0.5.1",
+    "html-webpack-inline-source-plugin": "0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "lint-staged": "^8.1.5",
+    "pre-commit": "^1.2.2",
+    "style-loader": "^1.0.0",
+    "stylelint": "^10.0.1",
+    "stylelint-config-standard": "^18.3.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "url-loader": "^2.1.0",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {},
+  "author": "Grant Blakeman <gblakeman@linkedin.com>"
+}
