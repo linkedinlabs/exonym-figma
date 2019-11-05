@@ -1,3 +1,4 @@
+const Dotenv = require('dotenv-webpack');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
@@ -41,6 +42,7 @@ module.exports = (env, argv) => ({
     new webpack.EnvironmentPlugin({
       FEATURESET: (env && env.featureset ? 'public' : 'internal'),
     }),
+    new Dotenv(),
     new HtmlWebpackPlugin({
       template: './src/views/webview.html',
       filename: 'webview.html',

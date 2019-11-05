@@ -1,7 +1,10 @@
 import Messenger from './Messenger';
 import Painter from './Painter';
-import { loadTypefaces, readLanguageTypeface } from './Tools';
-import { LANGUAGES } from './constants';
+import {
+  asyncNetworkRequest,
+  loadTypefaces,
+  readLanguageTypefaces,
+} from './Tools';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -101,6 +104,16 @@ export default class App {
       return uniqueTypefaces;
     };
 
+    const readText = () => {
+      const textToTranslate: Array<{ text: string }> = [];
+
+      textNodes.forEach((textNode: TextNode) => {
+        textToTranslate.push({ text: textNode.characters });
+      });
+
+      return textToTranslate;
+    };
+
     const duplicateOrReplaceText = (
       languageTypeface?: FontName | null,
       action: 'duplicate' | 'replace' = 'duplicate',
@@ -120,6 +133,76 @@ export default class App {
       messenger.log('end manipulating text');
     };
 
+    const commitTranslationsToLayers = (
+      translations:
+        Array<{
+          translations: [{
+            text: string,
+            to: string,
+          }],
+        }>,
+    ): void => {
+      // check for changes to the original text and reset, if necessary
+      const setResetSettings = (textNode: TextNode): void => {
+        const originalText = JSON.parse(textNode.getPluginData('originalText') || null);
+
+        if (!originalText || originalText !== textNode.characters) {
+          // set/update original text
+          textNode.setPluginData(
+            'originalText',
+            JSON.stringify(textNode.characters),
+          );
+
+          // invalidate any existing translations
+          textNode.setPluginData(
+            'translations',
+            JSON.stringify([]),
+          );
+        }
+      };
+
+      // iterrate selection and add translations to layer node settings
+      textNodes.forEach((textNode: TextNode, index: number) => {
+        // first check if we need to reset the layer's settings
+        setResetSettings(textNode);
+
+        // read existing translations for the layer
+        const existingTranslations = JSON.parse(textNode.getPluginData('translations'));
+
+        // set or update translations
+        translations[index].translations.forEach((translation: {
+          text: string,
+          to: string,
+          painted?: boolean,
+        }) => {
+          let updated = false;
+          // existingTranslations[translation.to] = translation.text;
+          existingTranslations.forEach((existingTranslation) => {
+            if (existingTranslation.to === translation.to) {
+              // update text
+              existingTranslation.text = translation.text; // eslint-disable-line no-param-reassign
+              // set painting flag
+              existingTranslation.painted = false; // eslint-disable-line no-param-reassign
+              updated = true;
+            }
+          });
+
+          if (!updated) {
+            translation.painted = false; // eslint-disable-line no-param-reassign
+            existingTranslations.push(translation);
+          }
+        });
+
+        // save the translations on the layer settings
+        textNode.setPluginData(
+          'translations',
+          JSON.stringify(existingTranslations),
+        );
+      });
+
+      return null;
+    };
+
     const close = () => {
       if (this.shouldTerminate) {
         this.closeGUI();
@@ -127,21 +210,51 @@ export default class App {
     };
 
     const doTheThing = async () => {
+      const targetLanguages: Array<string> = ['it', 'ru', 'es', 'ja', 'zh-Hans'];
       const typefaces: Array<FontName> = readTypefaces();
-      const languageTypeface = readLanguageTypeface('thai');
+      const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
+      const textToTranslate: Array<{ text: string }> = readText();
 
-      if (languageTypeface) {
-        typefaces.push(languageTypeface);
+      // load typefaces
+      if (languageTypefaces) {
+        languageTypefaces.forEach(languageTypeface => typefaces.push(languageTypeface));
+      }
+      await loadTypefaces(typefaces, messenger);
+
+      // set up API call
+      const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
+      const url: string = `${baseUrl}&to=${targetLanguages.join(',')}`;
+      const headers = {
+        'Content-Type': 'application/json',
+        'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
+      };
+
+      // make API call
+      const data = await asyncNetworkRequest({
+        requestUrl: url,
+        headers,
+        bodyToSend: textToTranslate,
+        messenger,
+      });
+
+      if (data) {
+        // console.log(data); // eslint-disable-line no-console
+
+        // set new translations to the layer's settings
+        commitTranslationsToLayers(data);
+
+        // duplicateOrReplaceText(languageTypeface, 'duplicate');
+        duplicateOrReplaceText(null, 'duplicate');
+        // duplicateOrReplaceText(languageTypeface, 'replace');
+        // duplicateOrReplaceText(null, 'replace');
+
+        messenger.log('Do a thing.');
+        messenger.toast('A thing, it has been done.');
+      } else {
+        messenger.log('A thing could not be done.', 'error');
+        messenger.toast('Unfortunately, a thing could not be done.');
       }
 
-      await loadTypefaces(typefaces, messenger);
-      // duplicateOrReplaceText(languageTypeface, 'duplicate');
-      duplicateOrReplaceText(null, 'duplicate');
-      // duplicateOrReplaceText(languageTypeface, 'replace');
-      // duplicateOrReplaceText(null, 'replace');
-      messenger.log('Do a thing.');
-      messenger.toast('A thing, it has been done.');
-      console.log(LANGUAGES); // eslint-disable-line no-console
       close();
     };
 

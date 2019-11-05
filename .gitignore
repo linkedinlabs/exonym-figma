@@ -5,3 +5,6 @@ dist/
 node_modules
 .npm
 npm-debug.log
+
+# config
+.env
