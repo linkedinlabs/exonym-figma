@@ -183,7 +183,7 @@ const LANGUAGES: Array<{
     name: 'Russian',
     id: 'ru',
     font: null,
-    group: 'addl',
+    group: 'core',
   },
   {
     name: 'Spanish',
