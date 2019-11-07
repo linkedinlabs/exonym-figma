@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container padding">
   <section class="options">
     <h2>
       Language
@@ -17,55 +17,71 @@
       Options
     </h3>
     <ul>
-      <li>
+      <li class="radio">
         <input
+          class="radio__button"
           type="radio"
           name="text-action"
           value="replace"
           id="text-replace"
           checked
         >
-        <label for="text-replace">
+        <label
+          class="radio__label"
+          for="text-replace"
+        >
           Replace existing text
         </label>
       </li>
-      <li>
+      <li class="radio">
         <input
+          class="radio__button"
           type="radio"
           name="text-action"
           value="duplicate"
           id="text-duplicate"
         >
-        <label for="text-duplicate">
+        <label
+          class="radio__label"
+          for="text-duplicate"
+        >
           Duplicate selected layers
         </label>
       </li>
-      <li>
+      <li class="radio">
         <input
+          class="radio__button"
           type="radio"
           name="text-action"
           value="new-page"
           id="text-new-page"
         >
-        <label for="text-new-page">
+        <label
+          class="radio__label"
+          for="text-new-page"
+        >
           Create a new page
         </label>
       </li>
     </ul>
-    <p>
+    <p class="switch">
       <input
-        type="checkbox"
-        name="locked"
-        value="translate"
+        class="switch__toggle"
         id="locked"
+        name="locked"
+        type="checkbox"
+        value="translate"
       >
-      <label for="locked">
+      <label
+        class="switch__label"
+        for="locked"
+      >
         Translate locked layers
       </label>
     </p>
   </section>
   <footer id="actions">
-    <button id="doAThing">
+    <button class="button button--primary" id="doAThing">
       Do A Thing
     </button>
   </footer>
