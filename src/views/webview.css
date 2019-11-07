@@ -19,7 +19,7 @@ h2,
 h3,
 p,
 ul {
-  margin: 0;
+  margin: 0 0 12px 0;
   padding: 0;
 }
 
@@ -51,6 +51,14 @@ h3 {
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+
+.container .select label {
+  display: none;
+}
+
+.container .switch {
+  margin-top: 12px;
 }
 
 .container footer {
