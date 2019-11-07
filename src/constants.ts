@@ -223,8 +223,8 @@ const LANGUAGES: Array<{
  */
 const GUI_SETTINGS = {
   default: {
-    width: 140,
-    height: 180,
+    width: 200,
+    height: 326,
   },
   input: {
     width: 440,
