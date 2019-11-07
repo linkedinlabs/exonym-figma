@@ -5,7 +5,16 @@ import './views/webview.css';
 import { makeNetworkRequest } from './Tools';
 import { LANGUAGES } from './constants';
 
-const initLanguages = () => {
+/**
+ * @description Populates the `languages` <select> menu with a list of languages
+ * in the constants (LANGUAGES).
+ *
+ * @kind function
+ * @name initLanguages
+ *
+ * @returns {null}
+ */
+const initLanguages = (): void => {
   const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
 
   if (languagesElement) {
@@ -15,7 +24,6 @@ const initLanguages = () => {
     const addOption = (language: {
       name: string,
       id: string,
-      group: string,
     }) => {
       const newOptionElement: HTMLOptionElement = (<HTMLOptionElement> document.createElement('option'));
       newOptionElement.text = language.name;
@@ -35,11 +43,20 @@ const initLanguages = () => {
     // add additional group
     addlLanguages.forEach(language => addOption(language));
   }
+
+  return null;
 };
 
-/* watch Navigation action buttons */
-const watchActions = () => {
-  const actionsElement = (<HTMLInputElement> document.getElementById('actions'));
+/**
+ * @description Watch UI clicks for actions to pass on to the main plugin thread.
+ *
+ * @kind function
+ * @name watchActions
+ *
+ * @returns {null}
+ */
+const watchActions = (): void => {
+  const actionsElement: HTMLInputElement = (<HTMLInputElement> document.getElementById('actions'));
 
   if (actionsElement) {
     const onClick = (e: MouseEvent) => {
@@ -60,12 +77,22 @@ const watchActions = () => {
 
     actionsElement.addEventListener('click', onClick);
   }
+
+  return null;
 };
 
 /* process Messages from the plugin TKTK */
 
-/* watch for Messages from the plugin */
-const watchIncomingMessages = () => {
+/**
+ * @description Watches for incoming messages from the plugin’s main thread and dispatches
+ * them to the appropriate GUI actions.
+ *
+ * @kind function
+ * @name watchIncomingMessages
+ *
+ * @returns {null}
+ */
+const watchIncomingMessages = (): void => {
   onmessage = ( // eslint-disable-line no-undef
     event: {
       data: {
