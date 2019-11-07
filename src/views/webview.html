@@ -1,8 +1,72 @@
 <div class="container">
-  <h1>Hello, I am Exonym</h1>
-  <nav id="actions">
+  <section class="options">
+    <h2>
+      Language
+    </h2>
+    <p>
+      <label>
+        Language
+      </label>
+      <select>
+        <option>
+          A thing
+        </option>
+      </select>
+    </p>
+    <h3>
+      Options
+    </h3>
+    <ul>
+      <li>
+        <input
+          type="radio"
+          name="text-action"
+          value="replace"
+          id="text-replace"
+          checked
+        >
+        <label for="text-replace">
+          Replace existing text
+        </label>
+      </li>
+      <li>
+        <input
+          type="radio"
+          name="text-action"
+          value="duplicate"
+          id="text-duplicate"
+        >
+        <label for="text-duplicate">
+          Duplicate selected layers
+        </label>
+      </li>
+      <li>
+        <input
+          type="radio"
+          name="text-action"
+          value="new-page"
+          id="text-new-page"
+        >
+        <label for="text-new-page">
+          Create a new page
+        </label>
+      </li>
+    </ul>
+    <p>
+      <input
+        type="checkbox"
+        name="locked"
+        value="translate"
+        id="locked"
+      >
+      <label for="locked">
+        Translate locked layers
+      </label>
+    </p>
+  </section>
+  <footer id="actions">
     <button id="doAThing">
       Do A Thing
     </button>
-  </nav>
+  </footer>
 </div>
