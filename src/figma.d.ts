@@ -1,3 +1,6 @@
+// Vendor Declarations
+declare const selectMenu: window.selectMenu
+
 // Figma Plugin API version 1, update 5
 
 // Global variable with Figma's plugin API.
