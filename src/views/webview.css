@@ -315,9 +315,12 @@ h3 {
 .container.padding ul.select-menu__list { padding: 8px 0 8px 0; }
 
 .select-menu__list--active {
-  display: -webkit-box;
+  /*display: -webkit-box;
   display: -ms-flexbox;
-  display: flex;
+  display: flex;*/
+  display: block;
+  overflow-y: scroll;
+  height: 206px;
 }
 
 .select-menu__list-item {

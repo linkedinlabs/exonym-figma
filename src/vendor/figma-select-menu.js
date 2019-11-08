@@ -12,7 +12,7 @@
     position: 'under'
   }
   //position options
-  // 'positionToSelected' = open menu to selected item
+  // 'positionToSelection' = open menu to selected item
   // 'under' opens drop down below select menu
   // 'overlap' opens dropdown menu with first menu item overlapping select menu
 
