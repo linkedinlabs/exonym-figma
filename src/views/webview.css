@@ -7,7 +7,8 @@ body {
   margin: 0;
   padding: 0;
   font: normal 400 11px/16px Inter, Roboto, sans-serif; /* default stack from Figma */
-  letter-spacing: 0.025em;
+  color: rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.033333em;
 }
 
 svg {
@@ -211,7 +212,8 @@ h3 {
   font-weight: 400;
   font-size: 11px;
   line-height: 16px;
-  letter-spacing: 0.005em;
+  /*letter-spacing: 0.005em;*/
+  letter-spacing: inherit;
   position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -310,6 +312,7 @@ h3 {
   -webkit-box-shadow: 0 5px 17px rgba(0, 0, 0, 0.2), 0 2px 7px rgba(0, 0, 0, 0.15);
           box-shadow: 0 5px 17px rgba(0, 0, 0, 0.2), 0 2px 7px rgba(0, 0, 0, 0.15);
 }
+.container.padding ul.select-menu__list { padding: 8px 0 8px 0; }
 
 .select-menu__list--active {
   display: -webkit-box;
@@ -320,7 +323,8 @@ h3 {
 .select-menu__list-item {
   font-family: "Inter", sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  /*font-size: 12px;*/
+  font-size: 13px;
   line-height: 16px;
   letter-spacing: 0.005em;
   display: -webkit-box;
@@ -332,7 +336,8 @@ h3 {
   width: 100%;
   height: 24px;
   padding: 0 8px 0 4px;
-  color: #ffffff;
+  /*color: #ffffff;*/
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .select-menu__list-item--active .select-menu__list-item-icon {
@@ -383,7 +388,8 @@ h3 {
   font-weight: 400;
   font-size: 12px;
   line-height: 16px;
-  letter-spacing: 0.005em;
+  /*letter-spacing: 0.005em;*/
+  letter-spacing: inherit;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
