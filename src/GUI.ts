@@ -4,6 +4,7 @@
 import './views/webview.css';
 import { makeNetworkRequest } from './Tools';
 import { LANGUAGES } from './constants';
+import './vendor/figma-select-menu';
 
 /**
  * @description Populates the `languages` <select> menu with a list of languages
@@ -24,24 +25,27 @@ const initLanguages = (): void => {
     const addOption = (language: {
       name: string,
       id: string,
-    }) => {
+    }, optGroup: HTMLOptGroupElement) => {
       const newOptionElement: HTMLOptionElement = (<HTMLOptionElement> document.createElement('option'));
       newOptionElement.text = language.name;
       newOptionElement.value = language.id;
-      languagesElement.add(newOptionElement);
+      optGroup.append(newOptionElement);
     };
 
-    // add core group
-    coreLanguages.forEach(language => addOption(language));
+    // add groups
+    const coreOptGroupElement: HTMLOptGroupElement = (<HTMLOptGroupElement> document.createElement('optgroup'));
+    const addlOptGroupElement: HTMLOptGroupElement = (<HTMLOptGroupElement> document.createElement('optgroup'));
+    languagesElement.add(coreOptGroupElement);
+    languagesElement.add(addlOptGroupElement);
 
-    // add separator between groups
-    const newOptionElement: HTMLOptionElement = (<HTMLOptionElement> document.createElement('option'));
-    newOptionElement.disabled = true;
-    newOptionElement.text = '-----------------';
-    languagesElement.add(newOptionElement);
+    // add core options to group
+    coreLanguages.forEach(language => addOption(language, coreOptGroupElement));
 
-    // add additional group
-    addlLanguages.forEach(language => addOption(language));
+    // add additional options to group
+    addlLanguages.forEach(language => addOption(language, addlOptGroupElement));
+
+    // set up the Figma version
+    selectMenu.init({ position: 'overlap' });
   }
 
   return null;

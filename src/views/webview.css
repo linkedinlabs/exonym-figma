@@ -38,12 +38,9 @@ h3 {
   flex-direction: column;
 }
 
-.container.padding {
-  padding: 14px;
-}
-
-.container.wide {
-  flex-direction: row;
+.container .options {
+  display: block;
+  width: 100%;
 }
 
 .container ul,
@@ -51,6 +48,11 @@ h3 {
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+
+.container .select {
+  display: block;
+  width: 100%;
 }
 
 .container .select label {
@@ -69,6 +71,22 @@ h3 {
   justify-content: flex-end;
   padding: 16px;
   width: 100%;
+}
+
+.container.padding {
+  padding: 16px 8px 16px 8px;
+}
+
+.container.padding h2,
+.container.padding h3,
+.container.padding p,
+.container.padding ul {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.container.padding p.select {
+  padding: 0;
 }
 
 /*
@@ -442,7 +460,7 @@ h3 {
   position: absolute;
   top: 10px;
   /*left: 6px; original*/
-  left: 0;
+  left: 8px;
   display: block;
   width: 24px;
   height: 10px;
@@ -458,7 +476,7 @@ h3 {
   position: absolute;
   top: 10px;
   /*left: 6px; original*/
-  left: 0;
+  left: 8px;
   display: block;
   width: 10px;
   height: 10px;
