@@ -77,7 +77,7 @@ const readOptions = () => {
   return options;
 };
 
-/**
+/** WIP
  * @description Watch UI clicks for actions to pass on to the main plugin thread.
  *
  * @kind function
@@ -141,9 +141,6 @@ const watchIncomingMessages = (): void => {
     const { pluginMessage } = event.data;
 
     switch (pluginMessage.action) {
-      case 'doAThing':
-        console.log('a thing'); // eslint-disable-line no-console
-        break;
       case 'networkRequest':
         makeNetworkRequest(pluginMessage.payload);
         break;
