@@ -52,10 +52,13 @@ const showGUI = (): void => {
  */
 const dispatcher = (action: {
   type: string,
+  payload?: any,
   visual: boolean,
 }): void => {
+  const { type, payload, visual } = action;
+
   // if the action is not visual, close the plugin after running
-  const shouldTerminate: boolean = !action.visual;
+  const shouldTerminate: boolean = !visual;
 
   // pass along some GUI management and navigation functions to the App class
   const app = new App({
@@ -66,17 +69,17 @@ const dispatcher = (action: {
   });
 
   // run the action in the App class based on type
-  const runAction = (actionType: string) => {
-    switch (actionType) {
-      case 'doAThing':
-        app.doAThing();
+  const runAction = () => {
+    switch (type) {
+      case 'submit':
+        app.doAThing(payload);
         break;
       default:
         showGUI();
     }
   };
 
-  runAction(action.type);
+  runAction();
 
   return null;
 };
@@ -101,11 +104,14 @@ const main = (): void => {
   }
 
   // watch GUI action clicks -------------------------------------------------
-  figma.ui.onmessage = (msg: { navType: string }): void => {
-    // watch for nav actions and send to `dispatcher`
-    if (msg.navType) {
+  figma.ui.onmessage = (msg: { action: string, payload: any }): void => {
+    const { action, payload } = msg;
+
+    // watch for actions and send to `dispatcher`
+    if (action) {
       dispatcher({
-        type: msg.navType,
+        type: action,
+        payload,
         visual: true,
       });
     }

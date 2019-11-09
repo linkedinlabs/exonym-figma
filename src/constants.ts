@@ -96,16 +96,10 @@ const LANGUAGES: Array<{
     group: 'addl',
   },
   {
-    name: 'English (U.S.)',
+    name: 'English',
     id: 'en',
     font: null,
     group: 'core',
-  },
-  {
-    name: 'English (U.K.)',
-    id: 'en',
-    font: null,
-    group: 'addl',
   },
   {
     name: 'French',
