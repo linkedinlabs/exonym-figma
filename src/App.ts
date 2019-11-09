@@ -67,14 +67,17 @@ export default class App {
    *
    * @returns {null} Shows a Toast in the UI if nothing is selected.
    */
-  doAThing() {
+  doAThing(options: {
+    languages: Array<string>,
+    action: 'duplicate' | 'replace',
+    ignoreLocked: boolean,
+  }) {
     const {
       messenger,
       page,
       selection,
     } = assemble(figma);
-    const ignoreLocked = true;
-    // const ignoreLocked = false;
+    const { ignoreLocked } = options;
 
     let textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
     if (ignoreLocked) {
@@ -210,7 +213,10 @@ export default class App {
     };
 
     const doTheThing = async () => {
-      const targetLanguages: Array<string> = ['it', 'ru', 'es', 'ja', 'zh-Hans'];
+      const { action, languages } = options;
+
+      // const targetLanguages: Array<string> = ['it', 'ru', 'es', 'ja', 'zh-Hans'];
+      const targetLanguages: Array<string> = languages;
       const typefaces: Array<FontName> = readTypefaces();
       const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
       const textToTranslate: Array<{ text: string }> = readText();
@@ -244,7 +250,7 @@ export default class App {
         commitTranslationsToLayers(data);
 
         // duplicateOrReplaceText(languageTypeface, 'duplicate');
-        duplicateOrReplaceText(null, 'duplicate');
+        duplicateOrReplaceText(null, action);
         // duplicateOrReplaceText(languageTypeface, 'replace');
         // duplicateOrReplaceText(null, 'replace');
 
@@ -258,6 +264,10 @@ export default class App {
       close();
     };
 
-    return doTheThing();
+    if (textNodes.length > 0) {
+      return doTheThing();
+    }
+
+    return null;
   }
 }

@@ -51,6 +51,32 @@ const initLanguages = (): void => {
   return null;
 };
 
+/** WIP
+ * @description Watch UI clicks for actions to pass on to the main plugin thread.
+ *
+ * @kind function
+ * @name readOptions
+ *
+ * @returns {null}
+ */
+const readOptions = () => {
+  const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
+  const textActionElement: HTMLInputElement = document.querySelector('input[name="text-action"]:checked');
+  const translateLockedElement: HTMLInputElement = document.querySelector('input[name="locked"]');
+
+  const languages: Array<string> = [languagesElement.value]; // array here; eventually multi-lang
+  const textAction: string = textActionElement.value;
+  const translateLocked: boolean = translateLockedElement.checked;
+
+  const options = {
+    languages,
+    action: textAction,
+    ignoreLocked: !translateLocked,
+  };
+
+  return options;
+};
+
 /**
  * @description Watch UI clicks for actions to pass on to the main plugin thread.
  *
@@ -70,12 +96,17 @@ const watchActions = (): void => {
         // find action by element id
         const action = button.id;
 
-        // bubble action to main
-        parent.postMessage({
-          pluginMessage: {
-            navType: action,
-          },
-        }, '*');
+        if (action === 'submit') {
+          const payload = readOptions();
+
+          // bubble action to main
+          parent.postMessage({
+            pluginMessage: {
+              action,
+              payload,
+            },
+          }, '*');
+        }
       }
     };
 
