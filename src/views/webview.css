@@ -69,7 +69,8 @@ h3 {
   left: 0;
   bottom: 0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   padding: 16px;
   width: 100%;
 }
@@ -88,6 +89,11 @@ h3 {
 
 .container.padding p.select {
   padding: 0;
+}
+
+.container footer .mark {
+  width: 26px;
+  height: 32px;
 }
 
 /*
