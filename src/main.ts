@@ -70,9 +70,34 @@ const dispatcher = (action: {
 
   // run the action in the App class based on type
   const runAction = () => {
+    let quickTranslatePayload = null;
+    const setTranslatePayload = (quickTranslateType: string) => {
+      const language: string = quickTranslateType.replace('quick-translate-', '');
+      const options: {
+        languages: Array<string>,
+        action: 'duplicate',
+        ignoreLocked: boolean,
+      } = {
+        languages: [language],
+        action: 'duplicate',
+        ignoreLocked: true,
+      };
+      return options;
+    };
+
     switch (type) {
       case 'submit':
-        app.doAThing(payload);
+        app.translate(payload);
+        break;
+      case 'quick-translate-ar':
+      case 'quick-translate-zh-CHT':
+      case 'quick-translate-zh-CHS':
+      case 'quick-translate-en':
+      case 'quick-translate-de':
+      case 'quick-translate-ru':
+      case 'quick-translate-th':
+        quickTranslatePayload = setTranslatePayload(type);
+        app.translate(quickTranslatePayload);
         break;
       default:
         showGUI();

@@ -63,11 +63,11 @@ export default class App {
    * @description Does a thing.
    *
    * @kind function
-   * @name doAThing
+   * @name translate
    *
    * @returns {null} Shows a Toast in the UI if nothing is selected.
    */
-  doAThing(options: {
+  translate(options: {
     languages: Array<string>,
     action: 'duplicate' | 'replace',
     ignoreLocked: boolean,
@@ -212,7 +212,7 @@ export default class App {
       }
     };
 
-    const doTheThing = async () => {
+    const mainAction = async () => {
       const { action, languages } = options;
 
       // const targetLanguages: Array<string> = ['it', 'ru', 'es', 'ja', 'zh-Hans'];
@@ -265,7 +265,8 @@ export default class App {
     };
 
     if (textNodes.length > 0) {
-      return doTheThing();
+      // run the main thread; this sets everything else in motion
+      return mainAction();
     }
 
     return null;

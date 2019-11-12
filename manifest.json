@@ -14,7 +14,36 @@
     },
     {
       "name": "Quick Translate",
-      "command": "doAThing"
-    }
+      "menu": [
+        {
+          "name": "Arabic",
+          "command": "quick-translate-ar"
+        },
+        {
+          "name": "Chinese (Traditional)",
+          "command": "quick-translate-zh-CHT"
+        },
+        {
+          "name": "Chinese (Simplified)",
+          "command": "quick-translate-zh-CHS"
+        },
+        {
+          "name": "English",
+          "command": "quick-translate-en"
+        },
+        {
+          "name": "German",
+          "command": "quick-translate-de"
+        },
+        {
+          "name": "Russian",
+          "command": "quick-translate-ru"
+        },
+        {
+          "name": "Thai",
+          "command": "quick-translate-th"
+        }
+      ]
+    }    
   ]
 }
