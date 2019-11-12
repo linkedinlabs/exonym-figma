@@ -36,6 +36,7 @@ const showGUI = async (size: 'default' | 'info' = 'default'): void => {
       ignoreLocked: boolean,
       languages: Array<string>,
     } = await figma.clientStorage.getAsync('options');
+
     // set the options in the UI
     figma.ui.postMessage({
       action: 'setOptions',
