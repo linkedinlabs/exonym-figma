@@ -177,6 +177,8 @@ const setOptions = (options: {
   if (translateLockedElement) {
     translateLockedElement.checked = !ignoreLocked;
   }
+
+  sendLoadedMsg();
 };
 
 /**

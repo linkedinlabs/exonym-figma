@@ -37,11 +37,18 @@ const showGUI = async (size: 'default' | 'info' = 'default'): void => {
       languages: Array<string>,
     } = await figma.clientStorage.getAsync('options');
 
-    // set the options in the UI
-    figma.ui.postMessage({
-      action: 'setOptions',
-      payload: lastUsedOptions,
-    });
+    // update the UI with the existing options
+    if (lastUsedOptions) {
+      // set the options in the UI
+      figma.ui.postMessage({
+        action: 'setOptions',
+        payload: lastUsedOptions,
+      });
+
+      // wait for the UI to tell us it is done setting options
+      // this prevents showing the UI while changes are being drawn
+      await awaitUIReadiness();
+    }
   }
 
   // set UI panel size
