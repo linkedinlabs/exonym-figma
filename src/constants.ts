@@ -220,7 +220,7 @@ const GUI_SETTINGS = {
     width: 200,
     height: 326,
   },
-  input: {
+  info: {
     width: 440,
     height: 145,
   },

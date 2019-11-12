@@ -59,6 +59,10 @@ export default class App {
     this.showGUI = showGUI;
   }
 
+  showToolbar() {
+    this.showGUI();
+  }
+
   /**
    * @description Does a thing.
    *
@@ -214,7 +218,6 @@ export default class App {
 
     const mainAction = async () => {
       const { action, languages } = options;
-
       // const targetLanguages: Array<string> = ['it', 'ru', 'es', 'ja', 'zh-Hans'];
       const targetLanguages: Array<string> = languages;
       const typefaces: Array<FontName> = readTypefaces();
@@ -265,7 +268,7 @@ export default class App {
     };
 
     if (textNodes.length > 0) {
-      // run the main thread; this sets everything else in motion
+      // run the main thread this sets everything else in motion
       return mainAction();
     }
 
