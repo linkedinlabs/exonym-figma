@@ -134,7 +134,41 @@ const watchActions = (): void => {
   return null;
 };
 
-/* process Messages from the plugin TKTK */
+/* process Messages from the plugin */
+
+/** WIP
+ * @description Compiles the plugin’s options form elements into an object formatted for
+ * consumption in the main thread.
+ *
+ * @kind function
+ * @name setOptions
+ *
+ * @returns {Object} option Includes an array of languages to translate, the action to take
+ * on the text blocks, and whether or not to ignore locked layers.
+ */
+const setOptions = (options: {
+  action: 'duplicate' | 'replace',
+  ignoreLocked: boolean,
+  languages: Array<string>,
+}): void => {
+  const { languages, action, ignoreLocked } = options;
+
+  const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
+  const textActionElement: HTMLInputElement = document.querySelector(`input[value="${action}"]`);
+  const translateLockedElement: HTMLInputElement = document.querySelector('input[name="locked"]');
+
+  if (languagesElement) {
+    languagesElement.value = languages[0];
+  }
+
+  if (textActionElement) {
+    textActionElement.checked = true;
+  }
+
+  if (translateLockedElement) {
+    translateLockedElement.checked = !ignoreLocked;
+  }
+};
 
 /**
  * @description Watches for incoming messages from the plugin’s main thread and dispatches
@@ -157,9 +191,13 @@ const watchIncomingMessages = (): void => {
     },
   ) => {
     const { pluginMessage } = event.data;
+
     switch (pluginMessage.action) {
       case 'networkRequest':
         makeNetworkRequest(pluginMessage.payload);
+        break;
+      case 'setOptions':
+        setOptions(pluginMessage.payload);
         break;
       default:
         return null;
