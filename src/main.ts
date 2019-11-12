@@ -28,7 +28,21 @@ const closeGUI = (): void => {
  *
  * @returns {null} Shows a Toast in the UI if nothing is selected.
  */
-const showGUI = (size: 'default' | 'info' = 'default'): void => {
+const showGUI = async (size: 'default' | 'info' = 'default'): void => {
+  if (size === 'default') {
+    // retrieve existing options
+    const lastUsedOptions: {
+      action: 'duplicate' | 'replace',
+      ignoreLocked: boolean,
+      languages: Array<string>,
+    } = await figma.clientStorage.getAsync('options');
+    // set the options in the UI
+    figma.ui.postMessage({
+      action: 'setOptions',
+      payload: lastUsedOptions,
+    });
+  }
+
   // set UI panel size
   resizeGUI(size, figma.ui);
 
