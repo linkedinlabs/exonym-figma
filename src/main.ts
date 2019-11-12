@@ -1,6 +1,7 @@
 // ++++++++++++++++++++++++++ Specter for Figma +++++++++++++++++++++++++++
 import App from './App';
-import { GUI_SETTINGS } from './constants';
+import Messenger from './Messenger';
+import { awaitUIReadiness, resizeGUI } from './Tools';
 
 // GUI management -------------------------------------------------
 
@@ -23,15 +24,16 @@ const closeGUI = (): void => {
  *
  * @kind function
  * @name showGUI
+ * @param {string} size An optional param calling one of the UI sizes defined in GUI_SETTINGS.
  *
  * @returns {null} Shows a Toast in the UI if nothing is selected.
  */
-const showGUI = (): void => {
-  // show UI – command: tools
-  figma.showUI(__html__, { // eslint-disable-line no-undef
-    width: GUI_SETTINGS.default.width,
-    height: GUI_SETTINGS.default.height,
-  });
+const showGUI = (size: 'default' | 'info' = 'default'): void => {
+  // set UI panel size
+  resizeGUI(size, figma.ui);
+
+  // show UI
+  figma.ui.show();
 
   return null;
 };
@@ -50,11 +52,11 @@ const showGUI = (): void => {
  * command came from the GUI or the menu.
  * @returns {null}
  */
-const dispatcher = (action: {
+const dispatcher = async (action: {
   type: string,
   payload?: any,
   visual: boolean,
-}): void => {
+}) => {
   const { type, payload, visual } = action;
 
   // if the action is not visual, close the plugin after running
@@ -100,7 +102,7 @@ const dispatcher = (action: {
         app.translate(quickTranslatePayload);
         break;
       default:
-        showGUI();
+        app.showToolbar();
     }
   };
 
@@ -119,8 +121,17 @@ export default dispatcher;
  *
  * @returns {null}
  */
-const main = (): void => {
-  // watch menu commands -------------------------------------------------
+const main = async () => {
+  // set up logging
+  const messenger = new Messenger({ for: figma, in: figma.currentPage });
+
+  // set up the UI, hidden by default -----------------------------------------
+  figma.showUI(__html__, { visible: false }); // eslint-disable-line no-undef
+
+  // make sure UI has finished setting up
+  await awaitUIReadiness(messenger);
+
+  // watch menu commands ------------------------------------------------------
   if (figma.command) {
     dispatcher({
       type: figma.command,
@@ -128,7 +139,7 @@ const main = (): void => {
     });
   }
 
-  // watch GUI action clicks -------------------------------------------------
+  // watch GUI action clicks --------------------------------------------------
   figma.ui.onmessage = (msg: { action: string, payload: any }): void => {
     const { action, payload } = msg;
 

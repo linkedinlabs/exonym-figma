@@ -7,6 +7,22 @@ import { LANGUAGES } from './constants';
 import './vendor/figma-select-menu';
 
 /**
+ * @description Posts a message to the main thread with `loaded` set to `true`. Used in the
+ * main thread to indicate the GUI is listening.
+ *
+ * @kind function
+ * @name sendLoadedMsg
+ *
+ * @returns {null}
+ */
+const sendLoadedMsg = (): void => {
+  // send message to main thread indicating UI has loaded
+  parent.postMessage({ pluginMessage: { loaded: true } }, '*');
+
+  return null;
+};
+
+/**
  * @description Populates the `languages` <select> menu with a list of languages
  * in the constants (LANGUAGES).
  *
@@ -52,12 +68,14 @@ const initLanguages = (): void => {
 };
 
 /** WIP
- * @description Watch UI clicks for actions to pass on to the main plugin thread.
+ * @description Compiles the plugin’s options form elements into an object formatted for
+ * consumption in the main thread.
  *
  * @kind function
  * @name readOptions
  *
- * @returns {null}
+ * @returns {Object} option Includes an array of languages to translate, the action to take
+ * on the text blocks, and whether or not to ignore locked layers.
  */
 const readOptions = () => {
   const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
@@ -77,7 +95,7 @@ const readOptions = () => {
   return options;
 };
 
-/** WIP
+/**
  * @description Watch UI clicks for actions to pass on to the main plugin thread.
  *
  * @kind function
@@ -139,7 +157,6 @@ const watchIncomingMessages = (): void => {
     },
   ) => {
     const { pluginMessage } = event.data;
-
     switch (pluginMessage.action) {
       case 'networkRequest':
         makeNetworkRequest(pluginMessage.payload);
@@ -157,6 +174,4 @@ const watchIncomingMessages = (): void => {
 watchActions();
 watchIncomingMessages();
 initLanguages();
-
-// send message to main thread indicating UI has loaded
-parent.postMessage({ pluginMessage: { loaded: true } }, '*');
+sendLoadedMsg();

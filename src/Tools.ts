@@ -55,7 +55,7 @@ const pollWithPromise = (
 
       resolve(true);
     } else {
-      setTimeout(checkIsReady, 200, resolve);
+      setTimeout(checkIsReady, 25, resolve);
     }
   };
   return new Promise(checkIsReady);
@@ -89,23 +89,6 @@ const asyncNetworkRequest = async (options: {
   // set blank response
   let response = null;
 
-  // we need to wait for the UI to be ready:
-  // network calls are made through the UI iframe
-  const awaitUIReadiness = async () => {
-    // set UI readiness check to falsey
-    let ready = false;
-
-    // simple function to check truthiness of `ready`
-    const isUIReady = () => ready;
-
-    // set a one-time use listener
-    figma.ui.once('message', (msg) => {
-      if (msg && msg.loaded) { ready = true; }
-    });
-
-    await pollWithPromise(isUIReady, messenger);
-  };
-
   const awaitResponse = async () => {
     // simple function to check for existence of a response
     const responseExists = () => (response !== null);
@@ -130,11 +113,26 @@ const asyncNetworkRequest = async (options: {
   };
 
   // do the things
-  figma.showUI(__html__, { visible: false }); // eslint-disable-line no-undef
-  await awaitUIReadiness();
   makeRequest();
   await awaitResponse();
   return response;
+};
+
+// we need to wait for the UI to be ready:
+// network calls are made through the UI iframe
+const awaitUIReadiness = async (messenger?) => {
+  // set UI readiness check to falsey
+  let ready = false;
+
+  // simple function to check truthiness of `ready`
+  const isUIReady = () => ready;
+
+  // set a one-time use listener
+  figma.ui.once('message', (msg) => {
+    if (msg && msg.loaded) { ready = true; }
+  });
+
+  await pollWithPromise(isUIReady, messenger);
 };
 
 /** WIP
@@ -412,6 +410,7 @@ const isInternal = (): boolean => {
 export {
   asyncForEach,
   asyncNetworkRequest,
+  awaitUIReadiness,
   findFrame,
   getLayerSettings,
   isInternal,
