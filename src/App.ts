@@ -122,11 +122,14 @@ export default class App {
    *
    * @returns {null} Shows a Toast in the UI if nothing is selected.
    */
-  translate(options: {
-    languages: Array<string>,
-    action: 'duplicate' | 'replace',
-    translateLocked: boolean,
-  }) {
+  translate(
+    options: {
+      languages: Array<string>,
+      action: 'duplicate' | 'replace',
+      translateLocked: boolean,
+    },
+    savePrefs: boolean,
+  ) {
     const {
       messenger,
       page,
@@ -315,18 +318,13 @@ export default class App {
       });
 
       if (data) {
-        // console.log(data); // eslint-disable-line no-console
-
         // set new translations to the layer's settings
         commitTranslationsToLayers(data);
 
-        // duplicateOrReplaceText(languageTypeface, 'duplicate');
+        // duplicateOrReplaceText(languageTypeface, action); // TKTK
         duplicateOrReplaceText(null, action);
-        // duplicateOrReplaceText(languageTypeface, 'replace');
-        // duplicateOrReplaceText(null, 'replace');
 
         messenger.log('Do a thing.');
-        messenger.toast('A thing, it has been done.');
       } else {
         messenger.log('A thing could not be done.', 'error');
         messenger.toast('Unfortunately, a thing could not be done.');
@@ -335,14 +333,25 @@ export default class App {
       close();
     };
 
-    if (textNodes.length > 0) {
-      // save last-used options
+    // save current options
+    if (savePrefs) {
       figma.clientStorage.setAsync(DATA_KEYS.options, options);
+    }
 
+    // translate if text nodes are available
+    if (textNodes.length > 0) {
       // run the main thread this sets everything else in motion
       return mainAction();
     }
 
-    return null;
+    // otherwise display appropriate error messages
+    messenger.log('No text nodes were selected/found');
+    if (translateLocked) {
+      messenger.toast('❌ You need to select at least one text layer');
+    } else {
+      messenger.toast('❌ You need to select at least one unlocked text layer');
+    }
+
+    return close();
   }
 }

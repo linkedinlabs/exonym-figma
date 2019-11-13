@@ -96,7 +96,7 @@ const dispatcher = async (action: {
 
     switch (type) {
       case 'submit':
-        app.translate(payload);
+        app.translate(payload, true);
         break;
       case 'quick-translate-last':
       case 'quick-translate-ar':
@@ -107,7 +107,7 @@ const dispatcher = async (action: {
       case 'quick-translate-ru':
       case 'quick-translate-th':
         setTranslatePayload(type);
-        app.translate(quickTranslatePayload);
+        app.translate(quickTranslatePayload, false);
         break;
       default:
         App.showToolbar();
