@@ -74,16 +74,18 @@ export default class App {
   translate(options: {
     languages: Array<string>,
     action: 'duplicate' | 'replace',
-    ignoreLocked: boolean,
+    translateLocked: boolean,
   }) {
     const {
       messenger,
       page,
       selection,
     } = assemble(figma);
-    const { ignoreLocked } = options;
+    const { translateLocked } = options;
+
+    // retrieve selection of textnodes and filter for locked/unlocked based on options
     let textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
-    if (!ignoreLocked) {
+    if (!translateLocked) {
       textNodes = textNodes.filter((node: SceneNode) => !node.locked);
     }
 
