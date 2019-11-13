@@ -255,7 +255,10 @@ const findFrame = (layer: any) => {
  *
  * @returns {null} Runs the callback function.
  */
-const loadTypefaces = async (typefaces: Array<FontName>, messenger?: any) => {
+const loadTypefaces = async (
+  typefaces: Array<FontName>,
+  messenger?: { log: Function },
+) => {
   messenger.log('begin loading typefaces');
   await asyncForEach(typefaces, async (typeface: FontName) => {
     await figma.loadFontAsync(typeface);
