@@ -110,6 +110,9 @@ export default class Painter {
       }
       newTextNode.characters = updatedCharacters;
 
+      // force unlock
+      newTextNode.locked = false;
+
       // placement
       newTextNode.x = this.layer.x + currentSpacingBuffer;
       newTextNode.y = this.layer.y + currentSpacingBuffer;

@@ -82,9 +82,8 @@ export default class App {
       selection,
     } = assemble(figma);
     const { ignoreLocked } = options;
-
     let textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
-    if (ignoreLocked) {
+    if (!ignoreLocked) {
       textNodes = textNodes.filter((node: SceneNode) => !node.locked);
     }
 
