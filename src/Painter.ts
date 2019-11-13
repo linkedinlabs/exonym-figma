@@ -133,38 +133,74 @@ export default class Painter {
       },
     };
 
-    // TKTK
-    // const layerSettings = getLayerSettings(this.page, this.layer.id);
+    // load list of translations for the layer from Settings
+    const existingTranslations = JSON.parse(this.layer.getPluginData(DATA_KEYS.translations));
 
-    // if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
-    //   result.status = 'error';
-    //   result.messages.log = 'Layer missing annotationText';
-    //   return result;
-    // }
-
-    const updatedCharacters: string = `${this.layer.characters}… and some more!`;
-
-    // create text node + update characters
-    const textNode: TextNode = this.layer;
-    if (languageTypeface) {
-      textNode.fontName = languageTypeface;
+    // if there are no translations, return with error
+    if (!existingTranslations) {
+      result.status = 'error';
+      result.messages.log = 'Layer is missing translations';
+      return result;
     }
-    textNode.characters = updatedCharacters;
 
-    // // update the `newPageSettings` array TKTK
-    // let newPageSettings = JSON.parse(this.page.getPluginData(PLUGIN_IDENTIFIER) || null);
-    // newPageSettings = updateArray(
-    //   'annotatedLayers',
-    //   newAnnotatedLayerSet,
-    //   newPageSettings,
-    //   'add',
-    // );
+    // isolate the translations that need to be added
+    // only unpainted items should be drawn
+    const unpaintedTranslations = existingTranslations.filter(translation => !translation.painted);
+    let updatedTranslations = existingTranslations;
 
-    // // commit the `Settings` update
-    // this.page.setPluginData(
-    //   PLUGIN_IDENTIFIER,
-    //   JSON.stringify(newPageSettings),
-    // );
+    // update the layer’s text with the translation
+    unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
+      // select the node to update
+      const textNode: TextNode = this.layer;
+
+      // add previous originalText to the translations list as a translation
+      const originalText: {
+        text: string,
+        from: string,
+      } = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
+      if (originalText && originalText.text === textNode.characters) {
+        const newTranslation: {
+          text: string,
+          to: string,
+          painted: boolean,
+        } = {
+          text: textNode.characters,
+          to: originalText.from,
+          painted: true,
+        };
+
+        // add/update the translations array with the original text
+        updatedTranslations = updateArray(updatedTranslations, newTranslation, 'to');
+      }
+
+      // update (replace) the text
+      const updatedCharacters: string = translation.text;
+      if (languageTypeface) {
+        textNode.fontName = languageTypeface;
+      }
+      textNode.characters = updatedCharacters;
+
+      // flip the painted flag + update the overall array
+      translation.painted = true; // eslint-disable-line no-param-reassign
+      updatedTranslations = updateArray(updatedTranslations, translation, 'to');
+
+      // update layer settings with a new originalText
+      const newOriginalText: {
+        text: string,
+        from: string,
+      } = {
+        text: updatedCharacters,
+        from: translation.to,
+      };
+
+      textNode.setPluginData(
+        DATA_KEYS.originalText,
+        JSON.stringify(newOriginalText),
+      );
+    });
+
+    // commit updated list of translations to Settings
+    this.layer.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
 
     // return a successful result
     result.status = 'success';
