@@ -42,6 +42,13 @@
         {
           "name": "Thai",
           "command": "quick-translate-th"
+        },
+        {
+          "separator": true
+        },
+        {
+          "name": "Last used…",
+          "command": "quick-translate-last"
         }
       ]
     }    
