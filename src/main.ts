@@ -2,7 +2,7 @@
 import App from './App';
 import Messenger from './Messenger';
 import { awaitUIReadiness } from './Tools';
-import { DATA_KEYS } from './constants';
+import { DATA_KEYS, LANGUAGES } from './constants';
 
 // GUI management -------------------------------------------------
 
@@ -77,7 +77,8 @@ const dispatcher = async (action: {
       };
 
       // set core options
-      if (lastUsedOptions
+      if (
+        lastUsedOptions
         && lastUsedOptions.action !== undefined
         && lastUsedOptions.translateLocked !== undefined
       ) {
@@ -86,8 +87,14 @@ const dispatcher = async (action: {
       }
 
       // set last-used language, if necessary
-      if (language === 'last' && lastUsedOptions.languages !== undefined) {
-        options.languages = lastUsedOptions.languages;
+      if (language === 'last') {
+        if (lastUsedOptions && lastUsedOptions.languages !== undefined) {
+          options.languages = lastUsedOptions.languages;
+        } else {
+          const index = 0;
+          const firstCoreLanguage = LANGUAGES.filter(lang => lang.group === 'core')[index];
+          options.languages = [firstCoreLanguage.id];
+        }
       }
 
       // commit options to payload
