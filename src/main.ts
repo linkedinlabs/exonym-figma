@@ -1,7 +1,7 @@
 // ++++++++++++++++++++++++++ Specter for Figma +++++++++++++++++++++++++++
 import App from './App';
 import Messenger from './Messenger';
-import { awaitUIReadiness, resizeGUI } from './Tools';
+import { awaitUIReadiness } from './Tools';
 
 // GUI management -------------------------------------------------
 
@@ -109,7 +109,7 @@ const dispatcher = async (action: {
         app.translate(quickTranslatePayload);
         break;
       default:
-        app.showToolbar();
+        App.showToolbar();
     }
   };
 
