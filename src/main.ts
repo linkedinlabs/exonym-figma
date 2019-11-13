@@ -28,7 +28,7 @@ const closeGUI = (): void => {
  *
  * @returns {null} Shows a Toast in the UI if nothing is selected.
  */
-const showGUI = async (size: 'default' | 'info' = 'default'): void => {
+const showGUI = async (size: 'default' | 'info' = 'default') => {
   if (size === 'default') {
     // retrieve existing options
     const lastUsedOptions: {
@@ -38,7 +38,11 @@ const showGUI = async (size: 'default' | 'info' = 'default'): void => {
     } = await figma.clientStorage.getAsync('options');
 
     // update the UI with the existing options
-    if (lastUsedOptions) {
+    if (lastUsedOptions
+      && lastUsedOptions.action !== undefined
+      && lastUsedOptions.ignoreLocked !== undefined
+      && lastUsedOptions.languages !== undefined
+    ) {
       // set the options in the UI
       figma.ui.postMessage({
         action: 'setOptions',
@@ -93,20 +97,39 @@ const dispatcher = async (action: {
   });
 
   // run the action in the App class based on type
-  const runAction = () => {
+  const runAction = async () => {
     let quickTranslatePayload = null;
+
+    // retrieve existing options
+    const lastUsedOptions: {
+      action: 'duplicate' | 'replace',
+      ignoreLocked: boolean,
+      languages: Array<string>,
+    } = await figma.clientStorage.getAsync('options');
+
     const setTranslatePayload = (quickTranslateType: string) => {
+      // set language to use
       const language: string = quickTranslateType.replace('quick-translate-', '');
+
+      // set preliminary options
       const options: {
         languages: Array<string>,
-        action: 'duplicate',
+        action: 'duplicate' | 'replace',
         ignoreLocked: boolean,
       } = {
         languages: [language],
         action: 'duplicate',
         ignoreLocked: true,
       };
-      return options;
+
+      if (lastUsedOptions
+        && lastUsedOptions.action !== undefined
+        && lastUsedOptions.ignoreLocked !== undefined
+      ) {
+        options.action = lastUsedOptions.action;
+        options.ignoreLocked = lastUsedOptions.ignoreLocked;
+      }
+      quickTranslatePayload = options;
     };
 
     switch (type) {
@@ -120,7 +143,7 @@ const dispatcher = async (action: {
       case 'quick-translate-de':
       case 'quick-translate-ru':
       case 'quick-translate-th':
-        quickTranslatePayload = setTranslatePayload(type);
+        setTranslatePayload(type);
         app.translate(quickTranslatePayload);
         break;
       default:
