@@ -2,7 +2,8 @@
 
 /**
  * @description A unique string to identify the plugin within Figma.
- * Changing this will break data retrieval in any `sharedPluginData` and potentially elsewhere.
+ * Changing one of these keys will break data retrieval or reset data in any
+ * `xPluginData` getters/setters and potentially elsewhere.
  * [More info]{@link https://www.figma.com/plugin-docs/api/properties/nodes-setsharedplugindata/}
  *
  * @kind constant
@@ -20,6 +21,21 @@ const PLUGIN_IDENTIFIER = 'com.linkedin.figma.exonym-plugin';
  * @type {string}
  */
 const PLUGIN_NAME = 'Exonym';
+
+/**
+ * @description An object containing the current string constants used as keys in plugin data.
+ * Changing one of these keys will break data retrieval or reset data in any
+ * `xPluginData` getters/setters and potentially elsewhere.
+ *
+ * @kind constant
+ * @name DATA_KEYS
+ * @type {Object}
+ */
+const DATA_KEYS = {
+  options: `${PLUGIN_IDENTIFIER}.options-01`,
+  translations: `${PLUGIN_IDENTIFIER}.translations-01`,
+  originalText: `${PLUGIN_IDENTIFIER}.original-text-01`,
+};
 
 /**
  * @description An object containing the current string constants the Figma API returns for
@@ -245,6 +261,7 @@ const TYPEFACES = {
 };
 
 export {
+  DATA_KEYS,
   FRAME_TYPES,
   GUI_SETTINGS,
   LANGUAGES,

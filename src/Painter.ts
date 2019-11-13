@@ -1,4 +1,5 @@
 import { findFrame, updateArray } from './Tools';
+import { DATA_KEYS } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Figma file
 // TKTK
@@ -52,7 +53,7 @@ export default class Painter {
     };
 
     // load list of translations for the layer from Settings
-    const existingTranslations = JSON.parse(this.layer.getPluginData('translations'));
+    const existingTranslations = JSON.parse(this.layer.getPluginData(DATA_KEYS.translations));
 
     // if there are no translations, return with error
     if (!existingTranslations) {
@@ -101,7 +102,7 @@ export default class Painter {
     });
 
     // commit updated list of translations to Settings
-    this.layer.setPluginData('translations', JSON.stringify(updatedTranslations));
+    this.layer.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
 
     // return a successful result
     result.status = 'success';
