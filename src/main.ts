@@ -122,6 +122,7 @@ const dispatcher = async (action: {
         translateLocked: false,
       };
 
+      // set core options
       if (lastUsedOptions
         && lastUsedOptions.action !== undefined
         && lastUsedOptions.translateLocked !== undefined
@@ -129,6 +130,13 @@ const dispatcher = async (action: {
         options.action = lastUsedOptions.action;
         options.translateLocked = lastUsedOptions.translateLocked;
       }
+
+      // set last-used language, if necessary
+      if (language === 'last' && lastUsedOptions.languages !== undefined) {
+        options.languages = lastUsedOptions.languages;
+      }
+
+      // commit options to payload
       quickTranslatePayload = options;
     };
 
@@ -136,6 +144,7 @@ const dispatcher = async (action: {
       case 'submit':
         app.translate(payload);
         break;
+      case 'quick-translate-last':
       case 'quick-translate-ar':
       case 'quick-translate-zh-CHT':
       case 'quick-translate-zh-CHS':
