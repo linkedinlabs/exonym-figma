@@ -9,58 +9,13 @@ import { awaitUIReadiness, resizeGUI } from './Tools';
  * @description Shuts down the plugin and closes the GUI.
  *
  * @kind function
- * @name closeGUI
+ * @name terminatePlugin
  *
  * @returns {null}
  */
-const closeGUI = (): void => {
-  // close the UI without suppressing error messages
+const terminatePlugin = (): void => {
+  // close the plugin without suppressing error messages
   figma.closePlugin();
-  return null;
-};
-
-/**
- * @description Enables the plugin GUI within Figma.
- *
- * @kind function
- * @name showGUI
- * @param {string} size An optional param calling one of the UI sizes defined in GUI_SETTINGS.
- *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
- */
-const showGUI = async (size: 'default' | 'info' = 'default') => {
-  if (size === 'default') {
-    // retrieve existing options
-    const lastUsedOptions: {
-      action: 'duplicate' | 'replace',
-      translateLocked: boolean,
-      languages: Array<string>,
-    } = await figma.clientStorage.getAsync('options');
-
-    // update the UI with the existing options
-    if (lastUsedOptions
-      && lastUsedOptions.action !== undefined
-      && lastUsedOptions.translateLocked !== undefined
-      && lastUsedOptions.languages !== undefined
-    ) {
-      // set the options in the UI
-      figma.ui.postMessage({
-        action: 'setOptions',
-        payload: lastUsedOptions,
-      });
-
-      // wait for the UI to tell us it is done setting options
-      // this prevents showing the UI while changes are being drawn
-      await awaitUIReadiness();
-    }
-  }
-
-  // set UI panel size
-  resizeGUI(size, figma.ui);
-
-  // show UI
-  figma.ui.show();
-
   return null;
 };
 
@@ -90,10 +45,8 @@ const dispatcher = async (action: {
 
   // pass along some GUI management and navigation functions to the App class
   const app = new App({
-    closeGUI,
-    dispatcher,
     shouldTerminate,
-    showGUI,
+    terminatePlugin,
   });
 
   // run the action in the App class based on type

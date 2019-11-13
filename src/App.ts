@@ -2,8 +2,10 @@ import Messenger from './Messenger';
 import Painter from './Painter';
 import {
   asyncNetworkRequest,
+  awaitUIReadiness,
   loadTypefaces,
   readLanguageTypefaces,
+  resizeGUI,
 } from './Tools';
 
 /**
@@ -35,35 +37,84 @@ const assemble = (context: any = null) => {
  *
  * @constructor
  *
- * @property closeGUI A convenience function for closing the GUI and shutting down the plugin.
- * @property showGUI A convenience function for showing the GUI.
- * @property dispatcher The function from `main.ts` that determines where to route GUI clicks.
  * @property shouldTerminate A boolean that tells us whether or not the GUI should remain open
  * at the end of the plugin’s current task.
+ * @property terminatePlugin A convenience function for properly shutting down the plugin.
  */
 export default class App {
-  closeGUI: Function;
   dispatcher: Function;
   shouldTerminate: boolean;
-  showGUI: Function;
+  terminatePlugin: Function;
 
   constructor({
-    closeGUI,
-    dispatcher,
     shouldTerminate,
-    showGUI,
+    terminatePlugin,
   }) {
-    this.closeGUI = closeGUI;
-    this.dispatcher = dispatcher;
     this.shouldTerminate = shouldTerminate;
-    this.showGUI = showGUI;
+    this.terminatePlugin = terminatePlugin;
+  }
+
+  /** WIP
+   * @description Enables the plugin GUI within Figma.
+   *
+   * @kind function
+   * @name showGUI
+   * @param {string} size An optional param calling one of the UI sizes defined in GUI_SETTINGS.
+   *
+   * @returns {null} Shows a Toast in the UI if nothing is selected.
+   */
+  async showGUI(options: {
+    size: 'default' | 'info',
+    messenger?: { log: Function },
+  }) {
+    const { size, messenger } = options;
+
+    if (messenger) {
+      messenger.log(`Display GUI at size: ${size}`);
+    }
+
+    if (size === 'default') {
+      // retrieve existing options
+      const lastUsedOptions: {
+        action: 'duplicate' | 'replace',
+        translateLocked: boolean,
+        languages: Array<string>,
+      } = await figma.clientStorage.getAsync('options');
+
+      // update the UI with the existing options
+      if (lastUsedOptions
+        && lastUsedOptions.action !== undefined
+        && lastUsedOptions.translateLocked !== undefined
+        && lastUsedOptions.languages !== undefined
+      ) {
+        // set the options in the UI
+        figma.ui.postMessage({
+          action: 'setOptions',
+          payload: lastUsedOptions,
+        });
+
+        // wait for the UI to tell us it is done setting options
+        // this prevents showing the UI while changes are being drawn
+        await awaitUIReadiness(messenger);
+      }
+    }
+
+    // set UI panel size
+    resizeGUI(size, figma.ui);
+
+    // show UI
+    figma.ui.show();
+
+    return null;
   }
 
   showToolbar() {
-    this.showGUI();
+    const { messenger } = assemble(figma);
+
+    this.showGUI({ size: 'default', messenger });
   }
 
-  /**
+  /** WIP
    * @description Does a thing.
    *
    * @kind function
@@ -213,7 +264,7 @@ export default class App {
 
     const close = () => {
       if (this.shouldTerminate) {
-        this.closeGUI();
+        this.terminatePlugin();
       }
     };
 
