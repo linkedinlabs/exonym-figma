@@ -1,4 +1,4 @@
-import { findFrame } from './Tools';
+import { findFrame, updateArray } from './Tools';
 
 // --- private functions for drawing/positioning annotation elements in the Figma file
 // TKTK
@@ -49,32 +49,6 @@ export default class Painter {
         toast: null,
         log: null,
       },
-    };
-
-    // TKTK move to Tools
-    const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remove' = 'add') => {
-      let updatedArray = array;
-
-      // find the index of a pre-existing `id` match on the array
-      const itemIndex: number = updatedArray.findIndex(
-        foundItem => (foundItem[itemKey] === item[itemKey]),
-      );
-
-      // if a match exists, remove it
-      // even if the action is `add`, always remove the existing entry to prevent duplicates
-      if (itemIndex > -1) {
-        updatedArray = [
-          ...updatedArray.slice(0, itemIndex),
-          ...updatedArray.slice(itemIndex + 1),
-        ];
-      }
-
-      // if the `action` is `add` (or update), append the new `item` to the array
-      if (action === 'add') {
-        updatedArray.push(item);
-      }
-
-      return updatedArray;
     };
 
     // load list of translations for the layer from Settings
