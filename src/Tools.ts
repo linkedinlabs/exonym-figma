@@ -2,7 +2,6 @@ import {
   FRAME_TYPES,
   GUI_SETTINGS,
   LANGUAGES,
-  PLUGIN_IDENTIFIER,
 } from './constants';
 
 // --- helper functions
@@ -311,67 +310,6 @@ const readLanguageTypefaces = (languageIdArray: Array<string>): Array<FontName> 
 };
 
 /**
- * @description Takes a Figma page object and a `layerId` and uses the Figma API’s
- * `getPluginData` to extract and return a specific layer’s settings.
- *
- * @kind function
- * @name getLayerSettings
- * @param {Object} page A Figma page object.
- * @param {string} layerId A string representing a layer ID.
- *
- * @returns {Object} The settings object that corresponds to the supplied `layerId`.
- */
-const getLayerSettings = (page: any, layerId: string) => {
-  const pageSettings = JSON.parse(page.getPluginData(PLUGIN_IDENTIFIER) || null);
-  let layerSettings: any = null;
-  if (pageSettings && pageSettings.layerSettings) {
-    const settingSetIndex = pageSettings.layerSettings.findIndex(
-      settingsSet => (settingsSet.id === layerId),
-    );
-    layerSettings = pageSettings.layerSettings[settingSetIndex];
-  }
-
-  return layerSettings;
-};
-
-/**
- * @description Takes a Figma page object, updated layer settings, and saves the updates
- * to the core page’s plugin settings using the Figma API’s `getPluginData` and
- * `setPluginData`.
- *
- * @kind function
- * @name setLayerSettings
- * @param {Object} page A Figma page object.
- * @param {Object} newLayerSettings An object containing the settings for a specific layer.
- * This object will be added to (or replace) the `layerSettings` node of the plugin settings.
- *
- * @returns {null}
- */
-const setLayerSettings = (page: any, newLayerSettings: any): void => {
-  const pageSettings = JSON.parse(page.getPluginData(PLUGIN_IDENTIFIER) || null);
-  let newPageSettings: any = {};
-  if (pageSettings) {
-    newPageSettings = pageSettings;
-  }
-
-  // update the `newPageSettings` array with `newLayerSettings`
-  newPageSettings = updateArray(
-    'layerSettings',
-    newLayerSettings,
-    newPageSettings,
-    'add',
-  );
-
-  // commit the `Settings` update
-  page.setPluginData(
-    PLUGIN_IDENTIFIER,
-    JSON.stringify(newPageSettings),
-  );
-
-  return null;
-};
-
-/**
  * @description Resizes the plugin iframe GUI within the Figma app.
  *
  * @kind function
@@ -412,13 +350,11 @@ export {
   asyncNetworkRequest,
   awaitUIReadiness,
   findFrame,
-  getLayerSettings,
   isInternal,
   loadTypefaces,
   makeNetworkRequest,
   pollWithPromise,
   readLanguageTypefaces,
   resizeGUI,
-  setLayerSettings,
   updateArray,
 };
