@@ -2,6 +2,7 @@
 import App from './App';
 import Messenger from './Messenger';
 import { awaitUIReadiness } from './Tools';
+import { DATA_KEYS } from './constants';
 
 // GUI management -------------------------------------------------
 
@@ -58,7 +59,7 @@ const dispatcher = async (action: {
       action: 'duplicate' | 'replace',
       translateLocked: boolean,
       languages: Array<string>,
-    } = await figma.clientStorage.getAsync('options');
+    } = await figma.clientStorage.getAsync(DATA_KEYS.options);
 
     const setTranslatePayload = (quickTranslateType: string) => {
       // set language to use

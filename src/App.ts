@@ -7,6 +7,7 @@ import {
   readLanguageTypefaces,
   resizeGUI,
 } from './Tools';
+import { DATA_KEYS } from './constants';
 
 /**
  * @description A shared helper function to set up in-UI messages and the logger.
@@ -78,7 +79,7 @@ export default class App {
         action: 'duplicate' | 'replace',
         translateLocked: boolean,
         languages: Array<string>,
-      } = await figma.clientStorage.getAsync('options');
+      } = await figma.clientStorage.getAsync(DATA_KEYS.options);
 
       // update the UI with the existing options
       if (lastUsedOptions
@@ -202,18 +203,18 @@ export default class App {
     ): void => {
       // check for changes to the original text and reset, if necessary
       const setResetSettings = (textNode: TextNode): void => {
-        const originalText = JSON.parse(textNode.getPluginData('originalText') || null);
+        const originalText = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
 
         if (!originalText || originalText !== textNode.characters) {
           // set/update original text
           textNode.setPluginData(
-            'originalText',
+            DATA_KEYS.originalText,
             JSON.stringify(textNode.characters),
           );
 
           // invalidate any existing translations
           textNode.setPluginData(
-            'translations',
+            DATA_KEYS.translations,
             JSON.stringify([]),
           );
         }
@@ -225,7 +226,7 @@ export default class App {
         setResetSettings(textNode);
 
         // read existing translations for the layer
-        const existingTranslations = JSON.parse(textNode.getPluginData('translations'));
+        const existingTranslations = JSON.parse(textNode.getPluginData(DATA_KEYS.translations));
 
         // set or update translations
         translations[index].translations.forEach((translation: {
@@ -253,7 +254,7 @@ export default class App {
 
         // save the translations on the layer settings
         textNode.setPluginData(
-          'translations',
+          DATA_KEYS.translations,
           JSON.stringify(existingTranslations),
         );
       });
@@ -319,7 +320,7 @@ export default class App {
 
     if (textNodes.length > 0) {
       // save last-used options
-      figma.clientStorage.setAsync('options', options);
+      figma.clientStorage.setAsync(DATA_KEYS.options, options);
 
       // run the main thread this sets everything else in motion
       return mainAction();
