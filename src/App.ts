@@ -42,7 +42,6 @@ const assemble = (context: any = null) => {
  * @property terminatePlugin A convenience function for properly shutting down the plugin.
  */
 export default class App {
-  dispatcher: Function;
   shouldTerminate: boolean;
   terminatePlugin: Function;
 
@@ -63,7 +62,7 @@ export default class App {
    *
    * @returns {null} Shows a Toast in the UI if nothing is selected.
    */
-  async showGUI(options: {
+  static async showGUI(options: {
     size: 'default' | 'info',
     messenger?: { log: Function },
   }) {
@@ -108,10 +107,10 @@ export default class App {
     return null;
   }
 
-  showToolbar() {
+  static showToolbar() {
     const { messenger } = assemble(figma);
 
-    this.showGUI({ size: 'default', messenger });
+    App.showGUI({ size: 'default', messenger });
   }
 
   /** WIP
