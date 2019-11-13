@@ -45,12 +45,12 @@
         },
         {
           "separator": true
-        },
-        {
-          "name": "Last used…",
-          "command": "quick-translate-last"
         }
       ]
-    }    
+    },
+    {
+      "name": "Last run translation…",
+      "command": "quick-translate-last"
+    }
   ]
 }
