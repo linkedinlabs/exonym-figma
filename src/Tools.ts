@@ -140,7 +140,7 @@ const awaitUIReadiness = async (messenger?) => {
  * an action (`add` or `remove`).
  *
  * @kind function
- * @name updateArray
+ * @name makeNetworkRequest
  *
  * @param {string} key String representing the top-level area of the array to modify.
  * @param {Object} item Object containing the new bit of data to add or
@@ -179,7 +179,7 @@ const makeNetworkRequest = (options: {
     .catch(err => console.error(err)); // eslint-disable-line no-console
 };
 
-/**
+/** WIP - updated
  * @description A reusable helper function to take an array and add or remove data from it
  * based on a top-level key and a defined action.
  * an action (`add` or `remove`).
@@ -197,37 +197,26 @@ const makeNetworkRequest = (options: {
 
  * @private
  */
-const updateArray = (
-  key: string,
-  item: { id: string },
-  array: Array<any>,
-  action: 'add' | 'remove' = 'add',
-) => {
-  let updatedItems = null;
-  const updatedArray = array;
-
-  // initialize the key if it does not exist
-  if (!updatedArray[key]) {
-    updatedArray[key] = [];
-  }
+const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remove' = 'add') => {
+  let updatedArray = array;
 
   // find the index of a pre-existing `id` match on the array
-  const itemIndex: number = updatedArray[key].findIndex(foundItem => (foundItem.id === item.id));
+  const itemIndex: number = updatedArray.findIndex(
+    foundItem => (foundItem[itemKey] === item[itemKey]),
+  );
 
   // if a match exists, remove it
   // even if the action is `add`, always remove the existing entry to prevent duplicates
   if (itemIndex > -1) {
-    updatedItems = [
-      ...updatedArray[key].slice(0, itemIndex),
-      ...updatedArray[key].slice(itemIndex + 1),
+    updatedArray = [
+      ...updatedArray.slice(0, itemIndex),
+      ...updatedArray.slice(itemIndex + 1),
     ];
-
-    updatedArray[key] = updatedItems;
   }
 
-  // if the `action` is `add`, append the new `item` to the array
+  // if the `action` is `add` (or update), append the new `item` to the array
   if (action === 'add') {
-    updatedArray[key].push(item);
+    updatedArray.push(item);
   }
 
   return updatedArray;
