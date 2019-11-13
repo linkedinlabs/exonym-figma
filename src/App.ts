@@ -195,6 +195,9 @@ export default class App {
     const commitTranslationsToLayers = (
       translations:
         Array<{
+          detectedLanguage: {
+            language: string,
+          }
           translations: [{
             text: string,
             to: string,
@@ -202,14 +205,28 @@ export default class App {
         }>,
     ): void => {
       // check for changes to the original text and reset, if necessary
-      const setResetSettings = (textNode: TextNode): void => {
-        const originalText = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
+      const setResetSettings = (
+        textNode: TextNode,
+        detectedLanguage: { language: string },
+      ): void => {
+        const originalText: {
+          text: string,
+          from: string,
+        } = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
 
-        if (!originalText || originalText !== textNode.characters) {
+        if (!originalText || originalText.text !== textNode.characters) {
           // set/update original text
+          const newOriginalText: {
+            text: string,
+            from: string,
+          } = {
+            text: textNode.characters,
+            from: detectedLanguage.language,
+          };
+
           textNode.setPluginData(
             DATA_KEYS.originalText,
-            JSON.stringify(textNode.characters),
+            JSON.stringify(newOriginalText),
           );
 
           // invalidate any existing translations
@@ -223,7 +240,7 @@ export default class App {
       // iterrate selection and add translations to layer node settings
       textNodes.forEach((textNode: TextNode, index: number) => {
         // first check if we need to reset the layer's settings
-        setResetSettings(textNode);
+        setResetSettings(textNode, translations[index].detectedLanguage);
 
         // read existing translations for the layer
         const existingTranslations = JSON.parse(textNode.getPluginData(DATA_KEYS.translations));

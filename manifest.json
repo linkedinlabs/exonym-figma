@@ -49,7 +49,7 @@
       ]
     },
     {
-      "name": "Last run translation…",
+      "name": "Run previous translation…",
       "command": "quick-translate-last"
     }
   ]
