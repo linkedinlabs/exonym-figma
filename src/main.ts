@@ -33,14 +33,14 @@ const showGUI = async (size: 'default' | 'info' = 'default') => {
     // retrieve existing options
     const lastUsedOptions: {
       action: 'duplicate' | 'replace',
-      ignoreLocked: boolean,
+      translateLocked: boolean,
       languages: Array<string>,
     } = await figma.clientStorage.getAsync('options');
 
     // update the UI with the existing options
     if (lastUsedOptions
       && lastUsedOptions.action !== undefined
-      && lastUsedOptions.ignoreLocked !== undefined
+      && lastUsedOptions.translateLocked !== undefined
       && lastUsedOptions.languages !== undefined
     ) {
       // set the options in the UI
@@ -103,7 +103,7 @@ const dispatcher = async (action: {
     // retrieve existing options
     const lastUsedOptions: {
       action: 'duplicate' | 'replace',
-      ignoreLocked: boolean,
+      translateLocked: boolean,
       languages: Array<string>,
     } = await figma.clientStorage.getAsync('options');
 
@@ -115,19 +115,19 @@ const dispatcher = async (action: {
       const options: {
         languages: Array<string>,
         action: 'duplicate' | 'replace',
-        ignoreLocked: boolean,
+        translateLocked: boolean,
       } = {
         languages: [language],
         action: 'duplicate',
-        ignoreLocked: true,
+        translateLocked: false,
       };
 
       if (lastUsedOptions
         && lastUsedOptions.action !== undefined
-        && lastUsedOptions.ignoreLocked !== undefined
+        && lastUsedOptions.translateLocked !== undefined
       ) {
         options.action = lastUsedOptions.action;
-        options.ignoreLocked = lastUsedOptions.ignoreLocked;
+        options.translateLocked = lastUsedOptions.translateLocked;
       }
       quickTranslatePayload = options;
     };

@@ -80,7 +80,7 @@ const initLanguages = (): void => {
 const readOptions = () => {
   const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
   const textActionElement: HTMLInputElement = document.querySelector('input[name="text-action"]:checked');
-  const translateLockedElement: HTMLInputElement = document.querySelector('input[name="locked"]');
+  const translateLockedElement: HTMLInputElement = document.querySelector('input[name="translate-locked"]');
 
   const languages: Array<string> = [languagesElement.value]; // array here; eventually multi-lang
   const textAction: string = textActionElement.value;
@@ -89,7 +89,7 @@ const readOptions = () => {
   const options = {
     languages,
     action: textAction,
-    ignoreLocked: !translateLocked,
+    translateLocked,
   };
 
   return options;
@@ -148,10 +148,10 @@ const watchActions = (): void => {
  */
 const setOptions = (options: {
   action: 'duplicate' | 'replace',
-  ignoreLocked: boolean,
+  translateLocked: boolean,
   languages: Array<string>,
 }): void => {
-  const { languages, action, ignoreLocked } = options;
+  const { languages, action, translateLocked } = options;
 
   // remove the Figma version so it can be reset
   // the figma-select-menu make a <select> clone, so it must be removed before selecting
@@ -160,7 +160,7 @@ const setOptions = (options: {
 
   const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
   const textActionElement: HTMLInputElement = document.querySelector(`input[value="${action}"]`);
-  const translateLockedElement: HTMLInputElement = document.querySelector('input[name="locked"]');
+  const translateLockedElement: HTMLInputElement = document.querySelector('input[name="translate-locked"]');
 
   if (languagesElement) {
     // set the language
@@ -175,7 +175,7 @@ const setOptions = (options: {
   }
 
   if (translateLockedElement) {
-    translateLockedElement.checked = !ignoreLocked;
+    translateLockedElement.checked = translateLocked;
   }
 
   sendLoadedMsg();
