@@ -151,6 +151,12 @@ const LANGUAGES: Array<{
     group: 'addl',
   },
   {
+    name: 'Klingon',
+    id: 'tlh',
+    font: null,
+    group: 'addl',
+  },
+  {
     name: 'Korean',
     id: 'ko',
     font: {

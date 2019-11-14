@@ -21,11 +21,11 @@
         },
         {
           "name": "Chinese (Traditional)",
-          "command": "quick-translate-zh-CHT"
+          "command": "quick-translate-zh-Hant"
         },
         {
           "name": "Chinese (Simplified)",
-          "command": "quick-translate-zh-CHS"
+          "command": "quick-translate-zh-Hans"
         },
         {
           "name": "English",
@@ -45,6 +45,74 @@
         },
         {
           "separator": true
+        },
+        {
+          "name": "Czech",
+          "command": "quick-translate-cs"
+        },
+        {
+          "name": "Danish",
+          "command": "quick-translate-da"
+        },
+        {
+          "name": "Dutch",
+          "command": "quick-translate-nl"
+        },
+        {
+          "name": "French",
+          "command": "quick-translate-fr"
+        },
+        {
+          "name": "Indonesian",
+          "command": "quick-translate-id"
+        },
+        {
+          "name": "Italian",
+          "command": "quick-translate-it"
+        },
+        {
+          "name": "Japanese",
+          "command": "quick-translate-ja"
+        },
+        {
+          "name": "Klingon",
+          "command": "quick-translate-tlh"
+        },
+        {
+          "name": "Korean",
+          "command": "quick-translate-ko"
+        },
+        {
+          "name": "Malay",
+          "command": "quick-translate-ms"
+        },
+        {
+          "name": "Norwegian",
+          "command": "quick-translate-no"
+        },
+        {
+          "name": "Polish",
+          "command": "quick-translate-pl"
+        },
+        {
+          "name": "Portuguese",
+          "command": "quick-translate-pt"
+        },
+        {
+          "name": "Romanian",
+          "command": "quick-translate-ro"
+        },
+        {
+          "name": "Spanish",
+          "command": "quick-translate-es"
+        },
+        {
+          "name": "Swedish",
+          "command": "quick-translate-sv"
+        },
+        {
+          "name": "Turkish",
+          "command": "quick-translate-tr"
         }
       ]
     },

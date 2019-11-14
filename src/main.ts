@@ -101,20 +101,25 @@ const dispatcher = async (action: {
       quickTranslatePayload = options;
     };
 
+    const verifyQuickType = (quickType): boolean => {
+      const typeSimplified = quickType.replace('quick-translate-', '');
+      if (typeSimplified
+        && (typeSimplified === 'last' || LANGUAGES.filter(lang => lang.id === typeSimplified))
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     switch (type) {
       case 'submit':
         app.translate(payload, true);
         break;
-      case 'quick-translate-last':
-      case 'quick-translate-ar':
-      case 'quick-translate-zh-CHT':
-      case 'quick-translate-zh-CHS':
-      case 'quick-translate-en':
-      case 'quick-translate-de':
-      case 'quick-translate-ru':
-      case 'quick-translate-th':
-        setTranslatePayload(type);
-        app.translate(quickTranslatePayload, false);
+      case String(type.match(/^quick-translate-.*/)):
+        if (verifyQuickType(type)) {
+          setTranslatePayload(type);
+          app.translate(quickTranslatePayload, false);
+        }
         break;
       default:
         App.showToolbar();
