@@ -1,3 +1,4 @@
+import Crawler from './Crawler';
 import Messenger from './Messenger';
 import Painter from './Painter';
 import {
@@ -138,10 +139,7 @@ export default class App {
     const { translateLocked } = options;
 
     // retrieve selection of textnodes and filter for locked/unlocked based on options
-    let textNodes: Array<TextNode> = selection.filter((node: SceneNode) => node.type === 'TEXT');
-    if (!translateLocked) {
-      textNodes = textNodes.filter((node: SceneNode) => !node.locked);
-    }
+    const textNodes = new Crawler({ for: selection }).text(translateLocked);
 
     const readTypefaces = () => {
       const uniqueTypefaces: Array<FontName> = [];
