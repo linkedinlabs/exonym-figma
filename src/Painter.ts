@@ -1,5 +1,5 @@
 import { findFrame, updateArray } from './Tools';
-import { DATA_KEYS } from './constants';
+import { DATA_KEYS, LANGUAGES } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Figma file
 // TKTK
@@ -37,7 +37,7 @@ export default class Painter {
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
-  duplicateText(languageTypeface?: FontName) {
+  duplicateText() {
     const result: {
       status: 'error' | 'success',
       messages: {
@@ -77,8 +77,10 @@ export default class Painter {
     // clone the initial layer and update the text with the translation
     unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
       const updatedCharacters: string = translation.text;
+      const languageConstant = LANGUAGES.find(language => language.id === translation.to);
+      const languageTypeface = languageConstant.font;
 
-      // create text node + update characters
+      // create text node + update characters and typeface
       const newTextNode: TextNode = this.layer.clone();
       if (languageTypeface) {
         newTextNode.fontName = languageTypeface;
@@ -118,7 +120,7 @@ export default class Painter {
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
-  replaceText(languageTypeface?: FontName) {
+  replaceText() {
     const result: {
       status: 'error' | 'success',
       messages: {
@@ -173,8 +175,10 @@ export default class Painter {
         updatedTranslations = updateArray(updatedTranslations, newTranslation, 'to');
       }
 
-      // update (replace) the text
+      // update (replace) the text + update typeface, if necessary
       const updatedCharacters: string = translation.text;
+      const languageConstant = LANGUAGES.find(language => language.id === translation.to);
+      const languageTypeface = languageConstant.font;
       if (languageTypeface) {
         textNode.fontName = languageTypeface;
       }
