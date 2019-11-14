@@ -176,10 +176,7 @@ export default class App {
       return textToTranslate;
     };
 
-    const duplicateOrReplaceText = (
-      languageTypeface?: FontName | null,
-      action: 'duplicate' | 'replace' = 'duplicate',
-    ) => {
+    const duplicateOrReplaceText = (action: 'duplicate' | 'replace' = 'duplicate') => {
       messenger.log('begin manipulating text');
       const isDuplicate = action === 'duplicate';
       textNodes.forEach((textNode: TextNode) => {
@@ -187,9 +184,9 @@ export default class App {
         const painter = new Painter({ for: textNode, in: page });
 
         if (isDuplicate) {
-          painter.duplicateText(languageTypeface);
+          painter.duplicateText();
         } else {
-          painter.replaceText(languageTypeface);
+          painter.replaceText();
         }
       });
       messenger.log('end manipulating text');
@@ -255,7 +252,7 @@ export default class App {
           painted?: boolean,
         }) => {
           let updated = false;
-          // existingTranslations[translation.to] = translation.text;
+
           existingTranslations.forEach((existingTranslation) => {
             if (existingTranslation.to === translation.to) {
               // update text
@@ -321,8 +318,8 @@ export default class App {
         // set new translations to the layer's settings
         commitTranslationsToLayers(data);
 
-        // duplicateOrReplaceText(languageTypeface, action); // TKTK
-        duplicateOrReplaceText(null, action);
+        // duplicate or replace the text
+        duplicateOrReplaceText(action);
 
         messenger.log('Do a thing.');
       } else {
