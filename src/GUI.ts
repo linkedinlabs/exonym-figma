@@ -158,13 +158,19 @@ const setOptions = (options: {
   // the menu from the DOM
   selectMenu.destroy();
 
+  const languageIndex = 0; // currently GUI only supports 1 language at a time; take first
+  const language = languages[languageIndex];
   const languagesElement: HTMLSelectElement = (<HTMLSelectElement> document.getElementById('languages'));
+  const languageOptionElement: HTMLOptionElement = document.querySelector(`option[value="${language}"]`);
+
   const textActionElement: HTMLInputElement = document.querySelector(`input[value="${action}"]`);
   const translateLockedElement: HTMLInputElement = document.querySelector('input[name="translate-locked"]');
 
   if (languagesElement) {
-    // set the language
-    languagesElement.value = languages[0];
+    // set the language if it exists in the menu
+    if (languageOptionElement) {
+      languagesElement.value = language;
+    }
 
     // set the Figma version of the menu
     selectMenu.init({ position: 'overlap' });
