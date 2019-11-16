@@ -227,15 +227,20 @@ const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remov
  * `FRAME_TYPES.main` layer is found. Returns the frame layer.
  *
  * @kind function
- * @name findFrame
+ * @name findTopFrame
  * @param {Object} layer A Figma layer object.
  *
  * @returns {Object} The top-level `FRAME_TYPES.main` layer.
  */
-const findFrame = (layer: any) => {
+const findTopFrame = (layer: any) => {
   let { parent } = layer;
 
-  // loop through each parent and adjust the coordinates
+  // if the parent is a page, we're done
+  if (parent && parent.type === 'PAGE') {
+    return parent;
+  }
+
+  // loop through each parent until we find the outermost FRAME
   if (parent) {
     while (parent.type !== FRAME_TYPES.main) {
       parent = parent.parent;
@@ -323,6 +328,17 @@ const resizeGUI = (
   return null;
 };
 
+/** WIP
+ * @description Checks the `FEATURESET` environment variable from webpack and
+ * determines if the featureset build should be `internal` or not.
+ *
+ * @kind function
+ * @name isTextNode
+ *
+ * @returns {boolean} `true` if the build is internal, `false` if it is not.
+ */
+const isTextNode = (node: any): node is TextNode => node.type === 'TEXT';
+
 /**
  * @description Checks the `FEATURESET` environment variable from webpack and
  * determines if the featureset build should be `internal` or not.
@@ -341,8 +357,9 @@ export {
   asyncForEach,
   asyncNetworkRequest,
   awaitUIReadiness,
-  findFrame,
+  findTopFrame,
   isInternal,
+  isTextNode,
   loadTypefaces,
   makeNetworkRequest,
   pollWithPromise,

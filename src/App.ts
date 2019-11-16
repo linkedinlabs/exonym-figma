@@ -136,10 +136,28 @@ export default class App {
       page,
       selection,
     } = assemble(figma);
-    const { translateLocked } = options;
+    const { action, translateLocked } = options;
+    let consolidatedSelection: Array<SceneNode | PageNode> = selection;
+
+    // if action is `duplicate`, need to duplicate the layers first
+    if (action === 'duplicate') {
+      consolidatedSelection = [];
+
+      selection.forEach((node) => {
+        // set up Painter instance for the layer
+        const painter = new Painter({ for: node, in: page });
+
+        // duplicate the layer
+        const newNodeResult = painter.duplicate();
+        if (newNodeResult.status === 'success') {
+          const newNode = newNodeResult.node;
+          consolidatedSelection.push(newNode);
+        }
+      });
+    }
 
     // retrieve selection of textnodes and filter for locked/unlocked based on options
-    const textNodes = new Crawler({ for: selection }).text(translateLocked);
+    const textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
 
     const readTypefaces = () => {
       const uniqueTypefaces: Array<FontName> = [];
@@ -174,20 +192,17 @@ export default class App {
       return textToTranslate;
     };
 
-    const duplicateOrReplaceText = (action: 'duplicate' | 'replace' = 'duplicate') => {
-      messenger.log('begin manipulating text');
-      const isDuplicate = action === 'duplicate';
-      textNodes.forEach((textNode: TextNode) => {
+    const manipulateText = () => {
+      messenger.log('Begin manipulating text');
+      textNodes.forEach((textNode: SceneNode) => {
         // set up Painter instance for the layer
         const painter = new Painter({ for: textNode, in: page });
 
-        if (isDuplicate) {
-          painter.duplicateText();
-        } else {
-          painter.replaceText();
-        }
+        // replace the existing text with the translation
+        // TKTK handle error result
+        painter.replaceText();
       });
-      messenger.log('end manipulating text');
+      messenger.log('End manipulating text');
     };
 
     const commitTranslationsToLayers = (
@@ -284,7 +299,7 @@ export default class App {
     };
 
     const mainAction = async () => {
-      const { action, languages } = options;
+      const { languages } = options;
       const targetLanguages: Array<string> = languages;
       const typefaces: Array<FontName> = readTypefaces();
       const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
@@ -316,13 +331,13 @@ export default class App {
         // set new translations to the layer's settings
         commitTranslationsToLayers(data);
 
-        // duplicate or replace the text
-        duplicateOrReplaceText(action);
+        // replace the text
+        manipulateText();
 
-        messenger.log('Do a thing.');
+        messenger.log('Text was translated.');
       } else {
-        messenger.log('A thing could not be done.', 'error');
-        messenger.toast('Unfortunately, a thing could not be done.');
+        messenger.log('Translations could not be completed', 'error');
+        messenger.toast('Unfortunately, text could not be translated.');
       }
 
       close();
@@ -347,6 +362,6 @@ export default class App {
       messenger.toast('❌ You need to select at least one unlocked text layer');
     }
 
-    return close();
+    return null;
   }
 }

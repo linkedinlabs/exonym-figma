@@ -46,8 +46,8 @@ const DATA_KEYS = {
  * @type {Object}
  */
 const FRAME_TYPES = {
-  main: 'FRAME',
   group: 'GROUP',
+  main: 'FRAME',
 };
 
 /** WIP
