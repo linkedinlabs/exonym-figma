@@ -139,8 +139,11 @@ export default class App {
     const { action, translateLocked } = options;
     let consolidatedSelection: Array<SceneNode | PageNode> = selection;
 
+    // retrieve selection of text nodes and filter for locked/unlocked based on options
+    let textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
+
     // if action is `duplicate`, need to duplicate the layers first
-    if (action === 'duplicate') {
+    if (textNodes.length > 0 && action === 'duplicate') {
       consolidatedSelection = [];
 
       selection.forEach((node) => {
@@ -154,10 +157,10 @@ export default class App {
           consolidatedSelection.push(newNode);
         }
       });
-    }
 
-    // retrieve selection of textnodes and filter for locked/unlocked based on options
-    const textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
+      // reset and retrieve selection of text nodes
+      textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
+    }
 
     const readTypefaces = () => {
       const uniqueTypefaces: Array<FontName> = [];
