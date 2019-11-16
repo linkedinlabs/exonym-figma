@@ -122,10 +122,34 @@ export default class Crawler {
    * @returns {Array} All TextNode items in an array.
    */
   text(includeLocked: boolean = false): Array<TextNode> {
+    // start with flattened selection of all layers
     const layers = this.all();
+
+    // filter and retain immediate text nodes
     let textNodes: Array<TextNode> = layers.filter((node: SceneNode) => node.type === 'TEXT');
+
+    // iterate through components
+    const componentNodes: Array<ComponentNode | InstanceNode> = layers.filter((node: SceneNode) => ((node.type === 'COMPONENT' || node.type === 'INSTANCE') && node.visible));
+    if (componentNodes) {
+      componentNodes.forEach((componentNode: ComponentNode | InstanceNode) => {
+        // find text node inside components
+        const innerTextNodesUntyped: any = componentNode.findAll(
+          (node: SceneNode) => node.type === 'TEXT',
+        );
+        const innerTextNodes: Array<TextNode> = innerTextNodesUntyped.filter(
+          (node: SceneNode) => node.type === 'TEXT',
+        );
+
+        if (innerTextNodes) {
+          // add any text nodes to the overall selection
+          innerTextNodes.forEach(innerTextNode => textNodes.push(innerTextNode));
+        }
+      });
+    }
+
+    // remove locked text nodes, if necessary
     if (!includeLocked) {
-      textNodes = textNodes.filter((node: SceneNode) => !node.locked);
+      textNodes = textNodes.filter((node: TextNode) => !node.locked);
     }
 
     return textNodes;

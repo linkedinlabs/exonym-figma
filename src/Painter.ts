@@ -1,4 +1,8 @@
-import { findFrame, updateArray } from './Tools';
+import {
+  findTopFrame,
+  isTextNode,
+  updateArray,
+} from './Tools';
 import { DATA_KEYS, LANGUAGES } from './constants';
 
 // --- private functions for drawing/positioning annotation elements in the Figma file
@@ -19,13 +23,55 @@ import { DATA_KEYS, LANGUAGES } from './constants';
  * @property page The PageNode in the Figma file containing the corresponding `frame` and `layer`.
  */
 export default class Painter {
-  layer: TextNode;
-  frame: FrameNode;
+  layer: SceneNode;
+  frame?: FrameNode;
   page: PageNode;
+  textLayer: TextNode;
   constructor({ for: layer, in: page }) {
     this.layer = layer;
-    this.frame = findFrame(this.layer);
+    this.textLayer = isTextNode(this.layer) ? this.layer : null;
+    this.frame = findTopFrame(this.layer);
     this.page = page;
+  }
+
+  duplicate() {
+    const result: {
+      node: SceneNode,
+      status: 'error' | 'success',
+      messages: {
+        toast: string,
+        log: string,
+      },
+    } = {
+      node: null,
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+
+    // set up initial layer spacing
+    let spacingBuffer: number = 56;
+    if ((this.layer.height / (1.5)) < spacingBuffer) {
+      spacingBuffer = (this.layer.height / (1.5));
+    }
+
+    // create text node + update characters and typeface
+    const newNode: SceneNode = this.layer.clone();
+    this.layer.parent.appendChild(newNode);
+
+    // force unlock - no one expects new layers to be locked
+    newNode.locked = false;
+
+    // placement
+    newNode.x = this.layer.x + spacingBuffer;
+    newNode.y = this.layer.y + spacingBuffer;
+    result.node = newNode;
+
+    // return a successful result
+    result.status = 'success';
+    return result;
   }
 
   /** WIP
@@ -81,7 +127,7 @@ export default class Painter {
       const languageTypeface = languageConstant.font;
 
       // create text node + update characters and typeface
-      const newTextNode: TextNode = this.layer.clone();
+      const newTextNode: TextNode = this.textLayer.clone();
       if (languageTypeface) {
         newTextNode.fontName = languageTypeface;
       }
@@ -153,7 +199,7 @@ export default class Painter {
     // update the layer’s text with the translation
     unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
       // select the node to update
-      const textNode: TextNode = this.layer;
+      const textNode: TextNode = this.textLayer;
 
       // add previous originalText to the translations list as a translation
       const originalText: {
