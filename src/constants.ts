@@ -118,6 +118,12 @@ const LANGUAGES: Array<{
     group: 'core',
   },
   {
+    name: 'Filipino / Tagalog',
+    id: 'fil',
+    font: null,
+    group: 'addl',
+  },
+  {
     name: 'French',
     id: 'fr',
     font: null,
