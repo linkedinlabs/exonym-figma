@@ -214,12 +214,6 @@ const LANGUAGES: Array<{
     group: 'addl',
   },
   {
-    name: 'Turkish',
-    id: 'tr',
-    font: null,
-    group: 'addl',
-  },
-  {
     name: 'Thai',
     id: 'th',
     font: {
@@ -227,6 +221,12 @@ const LANGUAGES: Array<{
       style: 'Regular',
     },
     group: 'core',
+  },
+  {
+    name: 'Turkish',
+    id: 'tr',
+    font: null,
+    group: 'addl',
   },
 ];
 
