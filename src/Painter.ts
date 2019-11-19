@@ -182,7 +182,9 @@ export default class Painter {
     };
 
     // load list of translations for the layer from Settings
-    const existingTranslations = JSON.parse(this.layer.getPluginData(DATA_KEYS.translations));
+    const existingTranslations = JSON.parse(
+      this.layer.getPluginData(DATA_KEYS.translations) || null,
+    );
 
     // if there are no translations, return with error
     if (!existingTranslations) {
