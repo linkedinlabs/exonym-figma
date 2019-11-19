@@ -113,12 +113,12 @@ const dispatcher = async (action: {
 
     switch (type) {
       case 'submit':
-        app.translate(payload, true);
+        app.runTranslate(payload, true);
         break;
       case String(type.match(/^quick-translate-.*/)):
         if (verifyQuickType(type)) {
           setTranslatePayload(type);
-          app.translate(quickTranslatePayload, false);
+          app.runTranslate(quickTranslatePayload, false);
         }
         break;
       default:
