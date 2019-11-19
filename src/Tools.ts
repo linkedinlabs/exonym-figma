@@ -197,7 +197,12 @@ const makeNetworkRequest = (options: {
 
  * @private
  */
-const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remove' = 'add') => {
+const updateArray = (
+  array,
+  item,
+  itemKey: string = 'id',
+  action: 'add' | 'update' | 'remove' = 'add',
+) => {
   let updatedArray = array;
 
   // find the index of a pre-existing `id` match on the array
@@ -215,7 +220,7 @@ const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remov
   }
 
   // if the `action` is `add` (or update), append the new `item` to the array
-  if (action === 'add') {
+  if (action !== 'remove') {
     updatedArray.push(item);
   }
 
