@@ -85,13 +85,17 @@ const commitToSettings = (results: {
   setResetSettings(textNode, detectedLanguage);
 
   // read existing translations for the layer
-  const existingTranslations = JSON.parse(textNode.getPluginData(DATA_KEYS.translations));
+  const existingTranslations: Array<{
+    to: string,
+    text: string,
+    painted: boolean,
+  }> = JSON.parse(textNode.getPluginData(DATA_KEYS.translations));
 
   // set or update translations
   translations.forEach((translation: {
     text: string,
     to: string,
-    painted?: boolean,
+    painted: boolean,
   }) => {
     let updated = false;
 
@@ -175,9 +179,10 @@ const translateLocal = (options: {
   } = options;
   let remainingTextNodes = textNodesToManipulate;
 
+  // -------- translate from custom dictionary
   if (customDictionary) {
     // iterate through each text node
-    textNodesToManipulate.forEach((textNode) => {
+    remainingTextNodes.forEach((textNode) => {
       // find the original word first in the dictionary
       let customWord = null;
       let fromLanguage = null;
@@ -208,7 +213,7 @@ const translateLocal = (options: {
           translations: [],
         };
 
-        // reassign `targetLanguages` so that we can check if they are found
+        // reassign `targetLanguages` so that we can check if all are found
         let languagesToCheck = targetLanguages;
 
         // look for a translations for each language; add it to the list
@@ -231,7 +236,7 @@ const translateLocal = (options: {
           }
         });
 
-        // commit the result if ALL languages were translated locally
+        // commit the result if ALL requested languages were translated locally
         if (languagesToCheck.length < 1) {
           // commit the result to the layer settings
           // NOTE: if a single language is missing from the custom translations,
@@ -245,6 +250,63 @@ const translateLocal = (options: {
       }
     });
   }
+
+  // -------- attempt to translate remaining locally
+  remainingTextNodes.forEach((textNode) => {
+    const originalText: {
+      text: string,
+      from: string,
+    } = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
+
+    // if the original text matches (and hasn't changed) we can check for an available translation
+    if (originalText && originalText.text === textNode.characters) {
+      const translations: Array<{
+        text: string,
+        to: string,
+        painted: boolean,
+      }> = JSON.parse(textNode.getPluginData(DATA_KEYS.translations) || null);
+      let updatedTranslations = translations;
+
+      if (translations.length > 0 && targetLanguages) {
+        // reassign `targetLanguages` so that we can check if all are found
+        let languagesToCheck = targetLanguages;
+
+        languagesToCheck.forEach((language, languageIndex) => {
+          const i = 0;
+          const foundTranslation = translations.filter(
+            translation => translation.to === language,
+          )[i];
+
+          if (foundTranslation) {
+            // set translation flag to paint
+            foundTranslation.painted = false;
+            updatedTranslations = updateArray(updatedTranslations, foundTranslation, 'to', 'update');
+
+            // remove the language from the master list because it was found
+            languagesToCheck = [
+              ...languagesToCheck.slice(0, languageIndex),
+              ...languagesToCheck.slice(languageIndex + 1),
+            ];
+          }
+        });
+
+        // commit the result if ALL requested languages were translated locally
+        if (languagesToCheck.length < 1) {
+          // commit the result to the layer settings
+          // NOTE: if a single language is missing from the custom translations,
+          // we fall back to the API for ALL translations
+          textNode.setPluginData(
+            DATA_KEYS.translations,
+            JSON.stringify(updatedTranslations),
+          );
+
+          // remove from the master array because all requested languages were translated
+          // this text layer will NOT be translater by the API
+          remainingTextNodes = updateArray(remainingTextNodes, textNode, 'id', 'remove');
+        }
+      }
+    }
+  });
 
   return { remainingTextNodes };
 };
