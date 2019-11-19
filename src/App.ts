@@ -2,7 +2,12 @@ import Crawler from './Crawler';
 import Messenger from './Messenger';
 import Painter from './Painter';
 import Translator from './Translator';
-import { awaitUIReadiness, resizeGUI } from './Tools';
+import {
+  awaitUIReadiness,
+  loadTypefaces,
+  readLanguageTypefaces,
+  resizeGUI,
+} from './Tools';
 import { DATA_KEYS } from './constants';
 
 /**
@@ -24,6 +29,37 @@ const assemble = (context: any = null) => {
     page,
     selection,
   };
+};
+
+/** WIP
+ * @description Does a thing.
+ *
+ * @kind function
+ * @name readTypefaces
+ *
+ * @returns {null} Shows a Toast in the UI if nothing is selected.
+ */
+const readTypefaces = (textNodes) => {
+  const uniqueTypefaces: Array<FontName> = [];
+
+  textNodes.forEach((textNode: TextNode) => {
+    if (!textNode.hasMissingFont) {
+      const typefaceOrSymbol: any = textNode.fontName;
+      const typeface: FontName = typefaceOrSymbol;
+
+      const itemIndex: number = uniqueTypefaces.findIndex(
+        (foundItem: FontName) => (
+          (foundItem.family === typeface.family)
+          && foundItem.style === typeface.style),
+      );
+
+      if (itemIndex < 0) {
+        uniqueTypefaces.push(typeface);
+      }
+    }
+  });
+
+  return uniqueTypefaces;
 };
 
 /**
@@ -206,13 +242,22 @@ export default class App {
     // translate if text nodes are available
     if (textNodes.length > 0) {
       // run the main thread this sets everything else in motion
-      const translator = new Translator({ for: textNodes, messenger });
+      const typefaces: Array<FontName> = readTypefaces(textNodes);
+      const languageTypefaces: Array<FontName> = readLanguageTypefaces(languages);
 
+      // load typefaces
+      if (languageTypefaces) {
+        languageTypefaces.forEach(languageTypeface => typefaces.push(languageTypeface));
+      }
+      await loadTypefaces(typefaces, messenger);
+
+      // do the text translations
+      const translator = new Translator({ for: textNodes, messenger });
       const translationResult = await translator.translate(languages);
       messenger.handleResult(translationResult);
 
       if (translationResult.status === 'success') {
-        // replace the text
+        // replace the text in the document
         manipulateText(textNodes);
       }
 

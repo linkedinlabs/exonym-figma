@@ -1,8 +1,4 @@
-import {
-  asyncNetworkRequest,
-  loadTypefaces,
-  readLanguageTypefaces,
-} from './Tools';
+import { asyncNetworkRequest } from './Tools';
 import { DATA_KEYS } from './constants';
 
 /**
@@ -143,37 +139,6 @@ export default class App {
    * @description Does a thing.
    *
    * @kind function
-   * @name readTypefaces
-   *
-   * @returns {null} Shows a Toast in the UI if nothing is selected.
-   */
-  readTypefaces() {
-    const uniqueTypefaces: Array<FontName> = [];
-
-    this.textNodes.forEach((textNode: TextNode) => {
-      if (!textNode.hasMissingFont) {
-        const typefaceOrSymbol: any = textNode.fontName;
-        const typeface: FontName = typefaceOrSymbol;
-
-        const itemIndex: number = uniqueTypefaces.findIndex(
-          (foundItem: FontName) => (
-            (foundItem.family === typeface.family)
-            && foundItem.style === typeface.style),
-        );
-
-        if (itemIndex < 0) {
-          uniqueTypefaces.push(typeface);
-        }
-      }
-    });
-
-    return uniqueTypefaces;
-  }
-
-  /** WIP
-   * @description Does a thing.
-   *
-   * @kind function
    * @name translate
    *
    * @returns {null} Shows a Toast in the UI if nothing is selected.
@@ -195,49 +160,37 @@ export default class App {
       },
     };
 
-    const mainAction = async () => {
-      const typefaces: Array<FontName> = this.readTypefaces();
-      const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
-      const textToTranslate: Array<{ text: string }> = this.readText();
+    // set up the text array
+    const textToTranslate: Array<{ text: string }> = this.readText();
 
-      // load typefaces
-      if (languageTypefaces) {
-        languageTypefaces.forEach(languageTypeface => typefaces.push(languageTypeface));
-      }
-      await loadTypefaces(typefaces, this.messenger);
-
-      // set up API call
-      const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
-      const url: string = `${baseUrl}&to=${targetLanguages.join(',')}`;
-      const headers = {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
-      };
-
-      // make API call
-      const data = await asyncNetworkRequest({
-        requestUrl: url,
-        headers,
-        bodyToSend: textToTranslate,
-        messenger: this.messenger,
-      });
-
-      if (data) {
-        // set new translations to the layer's settings
-        await this.commitToSettings(data);
-
-        // return a successful result
-        result.status = 'success';
-        result.messages.log = 'Text was translated';
-      } else {
-        result.status = 'error';
-        result.messages.log = 'Translations could not be completed';
-        result.messages.toast = 'Unfortunately, text could not be translated';
-      }
+    // set up API call options
+    const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
+    const url: string = `${baseUrl}&to=${targetLanguages.join(',')}`;
+    const headers = {
+      'Content-Type': 'application/json',
+      'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
     };
 
-    // run the main thread this sets everything else in motion
-    await mainAction();
+    // make API call
+    const data = await asyncNetworkRequest({
+      requestUrl: url,
+      headers,
+      bodyToSend: textToTranslate,
+      messenger: this.messenger,
+    });
+
+    if (data) {
+      // set new translations to the layer's settings
+      await this.commitToSettings(data);
+
+      // return a successful result
+      result.status = 'success';
+      result.messages.log = 'Text was translated';
+    } else {
+      result.status = 'error';
+      result.messages.log = 'Translations could not be completed';
+      result.messages.toast = 'Unfortunately, text could not be translated';
+    }
 
     return result;
   }
