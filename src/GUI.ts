@@ -147,7 +147,7 @@ const watchActions = (): void => {
  * on the text blocks, and whether or not to ignore locked layers.
  */
 const setOptions = (options: {
-  action: 'duplicate' | 'replace',
+  action: 'duplicate' | 'replace' | 'new-page',
   translateLocked: boolean,
   languages: Array<string>,
 }): void => {
