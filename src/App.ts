@@ -108,7 +108,7 @@ export default class App {
     if (size === 'default') {
       // retrieve existing options
       const lastUsedOptions: {
-        action: 'duplicate' | 'replace',
+        action: 'duplicate' | 'replace' | 'new-page',
         translateLocked: boolean,
         languages: Array<string>,
       } = await figma.clientStorage.getAsync(DATA_KEYS.options);
@@ -157,7 +157,7 @@ export default class App {
   async runTranslate(
     options: {
       languages: Array<string>,
-      action: 'duplicate' | 'replace',
+      action: 'duplicate' | 'replace' | 'new-page',
       translateLocked: boolean,
     },
     savePrefs: boolean,
