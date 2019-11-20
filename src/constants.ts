@@ -32,9 +32,9 @@ const PLUGIN_NAME = 'Exonym';
  * @type {Object}
  */
 const DATA_KEYS = {
-  options: `${PLUGIN_IDENTIFIER}.options-01`,
-  translations: `${PLUGIN_IDENTIFIER}.translations-01`,
-  originalText: `${PLUGIN_IDENTIFIER}.original-text-01`,
+  options: `${PLUGIN_IDENTIFIER}.options-001`,
+  translations: `${PLUGIN_IDENTIFIER}.translations-001`,
+  originalText: `${PLUGIN_IDENTIFIER}.original-text-001`,
 };
 
 /**
