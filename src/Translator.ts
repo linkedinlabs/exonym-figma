@@ -1,4 +1,8 @@
-import { asyncNetworkRequest, updateArray } from './Tools';
+import {
+  asyncForEach,
+  asyncNetworkRequest,
+  updateArray,
+} from './Tools';
 import { DATA_KEYS } from './constants';
 
 // for custom translations
@@ -387,6 +391,40 @@ export default class App {
     // set up the initial text array
     const textToTranslate: Array<{ text: string }> = readText(textNodesToManipulate);
 
+    // set options for the API request
+    // the API is limited to 5000 characters per request
+    // count the characters that need translating and split them into bundles
+    const apiRequests: Array<Array<{ text: string }>> = [];
+    let apiRequestBundle: Array<{ text: string }> = [];
+
+    let characterCount = 0;
+    textToTranslate.forEach((textSnippet) => {
+      const snippetCharCount = textSnippet.text.length;
+      const proposedCharCount = (characterCount + snippetCharCount);
+
+      // if adding the current snippet will not tip the bundle over 5k, go ahead
+      // otherwise the current bundle is full and a new one needs to be started
+      if (proposedCharCount < 5000) {
+        // add the current snippet to the current bundle
+        apiRequestBundle.push(textSnippet);
+        // update the character count
+        characterCount = proposedCharCount;
+      } else {
+        // push the previous bundle to the requests array
+        apiRequests.push(apiRequestBundle);
+
+        // reset the bundle array and character count
+        apiRequestBundle = [];
+        characterCount = snippetCharCount;
+
+        // add the current snippet to the new bundle
+        apiRequestBundle.push(textSnippet);
+      }
+    });
+
+    // need to push the last bundle into the requests array
+    apiRequests.push(apiRequestBundle);
+
     // set up API call options
     const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
     const url: string = `${baseUrl}&to=${targetLanguages.join(',')}`;
@@ -395,12 +433,19 @@ export default class App {
       'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
     };
 
-    // make API call
-    const data = await asyncNetworkRequest({
-      requestUrl: url,
-      headers,
-      bodyToSend: textToTranslate,
-      messenger: this.messenger,
+    // make API call(s)
+    let data = [];
+    await asyncForEach(apiRequests, async (apiRequestBody) => {
+      const updatedData = data;
+      const newData = await asyncNetworkRequest({
+        requestUrl: url,
+        headers,
+        bodyToSend: apiRequestBody,
+        messenger: this.messenger,
+      });
+
+      // update the master data object with the latest request result
+      data = updatedData.concat(newData);
     });
 
     if (data) {
