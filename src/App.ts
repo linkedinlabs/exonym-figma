@@ -244,6 +244,11 @@ export default class App {
         }
       });
 
+      if (newPage && action === 'new-page') {
+        figma.currentPage = newPage;
+        figma.currentPage.selection = newPage.children;
+      }
+
       // reset and retrieve selection of text nodes
       textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
     }
