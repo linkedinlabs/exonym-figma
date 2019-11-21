@@ -219,8 +219,17 @@ export default class App {
       figma.clientStorage.setAsync(DATA_KEYS.options, options);
     }
 
+    // if action is `new-page`, need to create a new page first
+    let newPage = null;
+    if (textNodes.length > 0 && action === 'new-page') {
+      newPage = figma.createPage();
+    }
+
     // if action is `duplicate`, need to duplicate the layers first
-    if (textNodes.length > 0 && action === 'duplicate') {
+    if (
+      textNodes.length > 0
+      && (action === 'duplicate' || action === 'new-page')
+    ) {
       consolidatedSelection = [];
 
       selection.forEach((node) => {
@@ -228,7 +237,7 @@ export default class App {
         const painter = new Painter({ for: node, in: page });
 
         // duplicate the layer
-        const newNodeResult = painter.duplicate();
+        const newNodeResult = painter.duplicate(newPage);
         if (newNodeResult.status === 'success') {
           const newNode = newNodeResult.node;
           consolidatedSelection.push(newNode);

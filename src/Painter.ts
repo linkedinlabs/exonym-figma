@@ -34,7 +34,7 @@ export default class Painter {
     this.page = page;
   }
 
-  duplicate() {
+  duplicate(newPage?: PageNode) {
     const result: {
       node: SceneNode,
       status: 'error' | 'success',
@@ -59,7 +59,7 @@ export default class Painter {
 
     // create text node + update characters and typeface
     const newNode: SceneNode = this.layer.clone();
-    this.layer.parent.appendChild(newNode);
+    newPage ? newPage.appendChild(newNode) : this.layer.parent.appendChild(newNode);
 
     // force unlock - no one expects new layers to be locked
     newNode.locked = false;
