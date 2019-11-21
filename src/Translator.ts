@@ -174,7 +174,9 @@ const commitAllToSettings = (
 const translateLocal = (options: {
   textNodesToManipulate: Array<TextNode>,
   targetLanguages: Array<string>,
-}) => {
+}): {
+  remainingTextNodes: Array<TextNode>,
+} => {
   // set custom dictionary
   const customDictionary = CUSTOM_TRANSLATIONS;
   const {
@@ -373,7 +375,9 @@ export default class App {
       targetLanguages,
     };
 
-    const localTranslateResults = translateLocal(localOptions);
+    const localTranslateResults: {
+      remainingTextNodes: Array<TextNode>
+    } = translateLocal(localOptions);
 
     // narrow the nodes to translate based on local results
     textNodesToManipulate = localTranslateResults.remainingTextNodes;
@@ -399,17 +403,7 @@ export default class App {
 
     let characterCount = 0;
     textToTranslate.forEach((textSnippet) => {
-      const snippetCharCount = textSnippet.text.length;
-      const proposedCharCount = (characterCount + snippetCharCount);
-
-      // if adding the current snippet will not tip the bundle over 5k, go ahead
-      // otherwise the current bundle is full and a new one needs to be started
-      if (proposedCharCount < 5000) {
-        // add the current snippet to the current bundle
-        apiRequestBundle.push(textSnippet);
-        // update the character count
-        characterCount = proposedCharCount;
-      } else {
+      const setNewBundle = (snippetCharCount: number): void => {
         // push the previous bundle to the requests array
         apiRequests.push(apiRequestBundle);
 
@@ -419,6 +413,26 @@ export default class App {
 
         // add the current snippet to the new bundle
         apiRequestBundle.push(textSnippet);
+      };
+
+      const snippetCharCount: number = textSnippet.text.length;
+      const proposedCharCount: number = (characterCount + snippetCharCount);
+
+      // make sure the bundle is under the request limit first
+      // otherwise the current bundle is full and a new one needs to be started
+      if (apiRequestBundle.length < 99) {
+        // if adding the current snippet will not tip the bundle over 5k, go ahead
+        // otherwise the current bundle is full and a new one needs to be started
+        if (proposedCharCount < 5000) {
+          // add the current snippet to the current bundle
+          apiRequestBundle.push(textSnippet);
+          // update the character count
+          characterCount = proposedCharCount;
+        } else {
+          setNewBundle(snippetCharCount);
+        }
+      } else {
+        setNewBundle(snippetCharCount);
       }
     });
 
