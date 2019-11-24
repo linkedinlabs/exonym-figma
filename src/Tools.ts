@@ -247,7 +247,7 @@ const findTopFrame = (layer: any) => {
 
   // loop through each parent until we find the outermost FRAME
   if (parent) {
-    while (parent.type !== FRAME_TYPES.main) {
+    while (parent && parent.type !== FRAME_TYPES.main) {
       parent = parent.parent;
     }
   }
