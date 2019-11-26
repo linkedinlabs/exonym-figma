@@ -31,30 +31,47 @@ const assemble = (context: any = null) => {
   };
 };
 
-/** WIP
- * @description Does a thing.
+/**
+ * @description Retrieves all of the typefaces (`FontName`) from a selection of text nodes
+ * and returns them as a unique array (no repeats).
  *
  * @kind function
  * @name readTypefaces
  *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
+ * @returns {Array} Returns an array of unique `FontName` entries (no repeats).
  */
 const readTypefaces = (textNodes) => {
   const uniqueTypefaces: Array<FontName> = [];
 
+  // take the typeface and, if new/unique, add it to the `uniqueTypefaces` array
+  const setTypeFace = (typeface: FontName) => {
+    const itemIndex: number = uniqueTypefaces.findIndex(
+      (foundItem: FontName) => (
+        (foundItem.family === typeface.family)
+        && foundItem.style === typeface.style),
+    );
+
+    if (itemIndex < 0) {
+      uniqueTypefaces.push(typeface);
+    }
+  };
+
+  // iterate through each text node
   textNodes.forEach((textNode: TextNode) => {
     if (!textNode.hasMissingFont) {
-      const typefaceOrSymbol: any = textNode.fontName;
-      const typeface: FontName = typefaceOrSymbol;
-
-      const itemIndex: number = uniqueTypefaces.findIndex(
-        (foundItem: FontName) => (
-          (foundItem.family === typeface.family)
-          && foundItem.style === typeface.style),
-      );
-
-      if (itemIndex < 0) {
-        uniqueTypefaces.push(typeface);
+      // some text nodes have multiple typefaces and the API returns a `figma.mixed` Symbol
+      if (typeof textNode.fontName !== 'symbol') {
+        // if a node does not return `fontName` as a Symbol, we can use the result directly
+        const typeface: any = textNode.fontName;
+        setTypeFace(typeface);
+      } else {
+        // use `getRangeFontName` to check each character (based on index) for its typeface
+        const { characters } = textNode;
+        const length: number = characters.length; // eslint-disable-line prefer-destructuring
+        for (let i = 0; i < length; i += 1) {
+          const typeface: any = textNode.getRangeFontName(i, i + 1);
+          setTypeFace(typeface);
+        }
       }
     }
   });
