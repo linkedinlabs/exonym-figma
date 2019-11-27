@@ -22,6 +22,39 @@ const sendLoadedMsg = (): void => {
   return null;
 };
 
+/** WIP
+ * @description Posts a message to the main thread with `loaded` set to `true`. Used in the
+ * main thread to indicate the GUI is listening.
+ *
+ * @kind function
+ * @name setButtonState
+ *
+ * @returns {null}
+ */
+const setButtonState = (
+  action: 'ready' | 'working' = 'ready',
+  button?: HTMLButtonElement,
+) => {
+  let buttonElement: HTMLButtonElement = null;
+  if (!button) {
+    buttonElement = (<HTMLButtonElement> document.getElementById('submit'));
+  } else {
+    buttonElement = button;
+  }
+
+  if (buttonElement) {
+    if (action === 'working') {
+      buttonElement.innerHTML = 'Working…';
+      buttonElement.classList.add('working');
+    } else {
+      buttonElement.innerHTML = 'Translate';
+      buttonElement.classList.remove('working');
+    }
+  }
+
+  return null;
+};
+
 /**
  * @description Populates the `languages` <select> menu with a list of languages
  * in the constants (LANGUAGES).
@@ -109,12 +142,19 @@ const watchActions = (): void => {
   if (actionsElement) {
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLTextAreaElement;
-      const button = target.closest('button');
+      const button: HTMLButtonElement = target.closest('button');
       if (button) {
         // find action by element id
         const action = button.id;
 
-        if (action === 'submit') {
+        if (
+          action === 'submit'
+          && !button.classList.contains('working')
+        ) {
+          // GUI - show we are working
+          setButtonState('working', button);
+
+          // read the form options
           const payload = readOptions();
 
           // bubble action to main
@@ -215,6 +255,9 @@ const watchIncomingMessages = (): void => {
         break;
       case 'setOptions':
         setOptions(pluginMessage.payload);
+        break;
+      case 'resetState':
+        setButtonState('ready');
         break;
       default:
         return null;
