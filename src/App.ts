@@ -219,14 +219,21 @@ export default class App {
      * @description Does a thing.
      *
      * @kind function
-     * @name close
+     * @name closeOrReset
      *
      * @returns {null} Shows a Toast in the UI if nothing is selected.
      */
-    const close = () => {
+    const closeOrReset = () => {
       if (this.shouldTerminate) {
-        this.terminatePlugin();
+        return this.terminatePlugin();
       }
+
+      // reset the working state
+      figma.ui.postMessage({
+        action: 'resetState',
+      });
+
+      return null;
     };
 
     // begin main thread of action ------------------------------------------------------
@@ -292,7 +299,7 @@ export default class App {
         manipulateText(textNodes);
       }
 
-      return close();
+      return closeOrReset();
     }
 
     // otherwise display appropriate error messages
@@ -301,6 +308,6 @@ export default class App {
       : '❌ You need to select at least one unlocked text layer';
     messenger.toast(toastErrorMessage);
     messenger.log('No text nodes were selected/found');
-    return close();
+    return closeOrReset();
   }
 }
