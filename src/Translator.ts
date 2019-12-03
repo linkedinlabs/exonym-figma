@@ -9,13 +9,16 @@ import { DATA_KEYS } from './constants';
 import CUSTOM_TRANSLATIONS from './vendor/linkedin-custom-translations';
 
 // --- private functions
-/** WIP
- * @description Does a thing.
+/**
+ * @description Takes an array of text nodes (`TextNode`) and reads the characters from each
+ * node, returning an array of strings.
  *
  * @kind function
  * @name readText
  *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
+ * @param {Array} textNodes An array of text nodes (`TextNode`) to extract text strings from.
+ *
+ * @returns {Array} Array containing text strings to translate.
  */
 const readText = (textNodes: Array<TextNode>): Array<{
   text: string,
@@ -33,13 +36,17 @@ const readText = (textNodes: Array<TextNode>): Array<{
   return textToTranslate;
 };
 
-/** WIP
- * @description Does a thing.
+/**
+ * @description Adds a translation result to the layer’s settings.
  *
  * @kind function
  * @name commitToSettings
  *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
+ * @param {Object} results An object containing `detectedLanguage`, the applicable text node
+ * (`TextNode`), and `translations`. The translations contain two strings: `text` is the
+ * translation result, and `to` is the language that corresponds to the result.
+ *
+ * @returns {null}
  */
 const commitToSettings = (results: {
   detectedLanguage: { language: string },
@@ -128,13 +135,20 @@ const commitToSettings = (results: {
   return null;
 };
 
-/** WIP
- * @description Does a thing.
+/**
+ * @description A helper function to take an array of translation results and feed them to
+ * the `commitToSettings` function, individually, on their corresponding text node.
  *
  * @kind function
- * @name commitToSettings
+ * @name commitAllToSettings
  *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
+ * @param {Array} translationResults An array of translations results, each result containing
+ * two objects: `detectedLanguage` and `translations`. The translations contain two strings: `text`
+ * is the translation result, and `to` is the language that corresponds to the result.
+ * @param {Array} textNodes An array of text nodes (`TextNode`) to match against the
+ * translations results.
+ *
+ * @returns {null}
  */
 const commitAllToSettings = (
   translationResults:
@@ -163,13 +177,20 @@ const commitAllToSettings = (
   return null;
 };
 
-/** WIP
- * @description Does a thing.
+/**
+ * @description Iterates through an array of text nodes (`TextNode`) and target languages, finding
+ * matches against the custom dictionary. Matches are committed layer settings and the
+ * corresponding text nodes are removed from the array that is returned.
  *
  * @kind function
  * @name translateLocal
  *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
+ * @param {Object} options Contains two objects: The`textNodesToManipulate` – an array of text nodes
+ * (`TextNode`) to check for matches and `targetLanguages` – an array of strings representing
+ * the languages (`id`) to check.
+ *
+ * @returns {Array} An array of text nodes (`TextNode`) with text that could not be matched to
+ * the custom dictionary.
  */
 const translateLocal = (options: {
   textNodesToManipulate: Array<TextNode>,
