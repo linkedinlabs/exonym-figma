@@ -22,12 +22,14 @@ const sendLoadedMsg = (): void => {
   return null;
 };
 
-/** WIP
- * @description Posts a message to the main thread with `loaded` set to `true`. Used in the
- * main thread to indicate the GUI is listening.
+/**
+ * @description Manipulates the webview DOM to set the visual button state.
  *
  * @kind function
  * @name setButtonState
+ *
+ * @param {('ready' | 'working')} action String representing the state to show.
+ * @param {Object} button An optional button DOM element.
  *
  * @returns {null}
  */
@@ -35,6 +37,7 @@ const setButtonState = (
   action: 'ready' | 'working' = 'ready',
   button?: HTMLButtonElement,
 ) => {
+  // define the button
   let buttonElement: HTMLButtonElement = null;
   if (!button) {
     buttonElement = (<HTMLButtonElement> document.getElementById('submit'));
@@ -42,6 +45,7 @@ const setButtonState = (
     buttonElement = button;
   }
 
+  // update the button
   if (buttonElement) {
     if (action === 'working') {
       buttonElement.innerHTML = 'Working…';
