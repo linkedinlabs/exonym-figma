@@ -1,6 +1,9 @@
 // Figma Plugin API version 1, update 7
 
 declare global {
+// Vendor Declarations
+const selectMenu: window.selectMenu
+
 // Global variable with Figma's plugin API.
 const figma: PluginAPI
 const __html__: string
