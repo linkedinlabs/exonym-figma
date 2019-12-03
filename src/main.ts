@@ -56,7 +56,7 @@ const dispatcher = async (action: {
 
     // retrieve existing options
     const lastUsedOptions: {
-      action: 'duplicate' | 'replace',
+      action: 'duplicate' | 'replace' | 'new-page',
       translateLocked: boolean,
       languages: Array<string>,
     } = await figma.clientStorage.getAsync(DATA_KEYS.options);
@@ -68,7 +68,7 @@ const dispatcher = async (action: {
       // set preliminary options
       const options: {
         languages: Array<string>,
-        action: 'duplicate' | 'replace',
+        action: 'duplicate' | 'replace' | 'new-page',
         translateLocked: boolean,
       } = {
         languages: [language],
