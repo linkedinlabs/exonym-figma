@@ -96,6 +96,10 @@ h3 {
   height: 32px;
 }
 
+.container .button.working {
+  opacity: 0.5;
+}
+
 /*
   boilerplate
   source: Tom Lowry's Figma UI JS/CSS files
