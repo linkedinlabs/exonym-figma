@@ -215,13 +215,14 @@ export default class App {
       messenger.log('End manipulating text');
     };
 
-    /** WIP
-     * @description Does a thing.
+    /**
+     * @description Resets the plugin GUI back to the original state or closes it entirely,
+     * terminating the plugin.
      *
      * @kind function
      * @name closeOrReset
      *
-     * @returns {null} Shows a Toast in the UI if nothing is selected.
+     * @returns {null}
      */
     const closeOrReset = () => {
       if (this.shouldTerminate) {
@@ -229,9 +230,12 @@ export default class App {
       }
 
       // reset the working state
-      figma.ui.postMessage({
+      const message: {
+        action: string,
+      } = {
         action: 'resetState',
-      });
+      };
+      figma.ui.postMessage(message);
 
       return null;
     };
