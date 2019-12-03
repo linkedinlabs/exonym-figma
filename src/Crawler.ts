@@ -129,7 +129,11 @@ export default class Crawler {
     let textNodes: Array<TextNode> = layers.filter((node: SceneNode) => node.type === 'TEXT');
 
     // iterate through components to find additional text nodes
-    const componentNodes: Array<ComponentNode | InstanceNode> = layers.filter((node: SceneNode) => ((node.type === 'COMPONENT' || node.type === 'INSTANCE') && node.visible));
+    const componentNodes: Array<ComponentNode | InstanceNode> = layers.filter(
+      (node: SceneNode) => (
+        (node.type === 'COMPONENT' || node.type === 'INSTANCE') && node.visible
+      ),
+    );
     if (componentNodes) {
       componentNodes.forEach((componentNode: ComponentNode | InstanceNode) => {
         // find text node inside components

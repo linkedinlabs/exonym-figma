@@ -284,8 +284,11 @@ export default class App {
       textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
     }
 
-    // translate if text nodes are available
-    if (textNodes.length > 0) {
+    // translate if text nodes are available and fonts are not missing
+    const missingTypefaces: Array<TextNode> = textNodes.filter(
+      (node: TextNode) => node.hasMissingFont,
+    );
+    if ((textNodes.length > 0) && (missingTypefaces.length < 1)) {
       // run the main thread this sets everything else in motion
       const typefaces: Array<FontName> = readTypefaces(textNodes);
       const languageTypefaces: Array<FontName> = readLanguageTypefaces(languages);
@@ -309,12 +312,24 @@ export default class App {
       return closeOrReset();
     }
 
-    // otherwise display appropriate error messages
-    const toastErrorMessage = translateLocked
-      ? '❌ You need to select at least one text layer'
-      : '❌ You need to select at least one unlocked text layer';
+    // otherwise set/display appropriate error messages
+    let toastErrorMessage = 'Something went wrong 😬';
+
+    // set the message + log
+    if (missingTypefaces.length > 0) {
+      toastErrorMessage = textNodes.length > 1
+        ? '❌ One or more select text layers contain missing fonts'
+        : '❌ This text layer contains a missing font';
+      messenger.log('Text node(s) contained missing fonts');
+    } else {
+      toastErrorMessage = translateLocked
+        ? '❌ You need to select at least one text layer'
+        : '❌ You need to select at least one unlocked text layer';
+      messenger.log('No text nodes were selected/found');
+    }
+
+    // display the message and terminate the plugin
     messenger.toast(toastErrorMessage);
-    messenger.log('No text nodes were selected/found');
     return closeOrReset();
   }
 }

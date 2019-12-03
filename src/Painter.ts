@@ -34,6 +34,15 @@ export default class Painter {
     this.page = page;
   }
 
+  /** WIP
+   * @description Locates annotation text in a layer’s Settings object and
+   * builds the visual annotation on the Figma frame.
+   *
+   * @kind function
+   * @name duplicate
+   *
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
   duplicate(newPage?: PageNode) {
     const result: {
       node: SceneNode,
