@@ -23,6 +23,43 @@ const sendLoadedMsg = (): void => {
 };
 
 /**
+ * @description Manipulates the webview DOM to set the visual button state.
+ *
+ * @kind function
+ * @name setButtonState
+ *
+ * @param {('ready' | 'working')} action String representing the state to show.
+ * @param {Object} button An optional button DOM element.
+ *
+ * @returns {null}
+ */
+const setButtonState = (
+  action: 'ready' | 'working' = 'ready',
+  button?: HTMLButtonElement,
+) => {
+  // define the button
+  let buttonElement: HTMLButtonElement = null;
+  if (!button) {
+    buttonElement = (<HTMLButtonElement> document.getElementById('submit'));
+  } else {
+    buttonElement = button;
+  }
+
+  // update the button
+  if (buttonElement) {
+    if (action === 'working') {
+      buttonElement.innerHTML = 'Working…';
+      buttonElement.classList.add('working');
+    } else {
+      buttonElement.innerHTML = 'Translate';
+      buttonElement.classList.remove('working');
+    }
+  }
+
+  return null;
+};
+
+/**
  * @description Populates the `languages` <select> menu with a list of languages
  * in the constants (LANGUAGES).
  *
@@ -109,12 +146,19 @@ const watchActions = (): void => {
   if (actionsElement) {
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLTextAreaElement;
-      const button = target.closest('button');
+      const button: HTMLButtonElement = target.closest('button');
       if (button) {
         // find action by element id
         const action = button.id;
 
-        if (action === 'submit') {
+        if (
+          action === 'submit'
+          && !button.classList.contains('working')
+        ) {
+          // GUI - show we are working
+          setButtonState('working', button);
+
+          // read the form options
           const payload = readOptions();
 
           // bubble action to main
@@ -215,6 +259,9 @@ const watchIncomingMessages = (): void => {
         break;
       case 'setOptions':
         setOptions(pluginMessage.payload);
+        break;
+      case 'resetState':
+        setButtonState('ready');
         break;
       default:
         return null;

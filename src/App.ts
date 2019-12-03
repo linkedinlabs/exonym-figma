@@ -215,18 +215,29 @@ export default class App {
       messenger.log('End manipulating text');
     };
 
-    /** WIP
-     * @description Does a thing.
+    /**
+     * @description Resets the plugin GUI back to the original state or closes it entirely,
+     * terminating the plugin.
      *
      * @kind function
-     * @name close
+     * @name closeOrReset
      *
-     * @returns {null} Shows a Toast in the UI if nothing is selected.
+     * @returns {null}
      */
-    const close = () => {
+    const closeOrReset = () => {
       if (this.shouldTerminate) {
-        this.terminatePlugin();
+        return this.terminatePlugin();
       }
+
+      // reset the working state
+      const message: {
+        action: string,
+      } = {
+        action: 'resetState',
+      };
+      figma.ui.postMessage(message);
+
+      return null;
     };
 
     // begin main thread of action ------------------------------------------------------
@@ -292,7 +303,7 @@ export default class App {
         manipulateText(textNodes);
       }
 
-      return close();
+      return closeOrReset();
     }
 
     // otherwise display appropriate error messages
@@ -301,6 +312,6 @@ export default class App {
       : '❌ You need to select at least one unlocked text layer';
     messenger.toast(toastErrorMessage);
     messenger.log('No text nodes were selected/found');
-    return close();
+    return closeOrReset();
   }
 }
