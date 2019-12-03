@@ -33,14 +33,16 @@ const assemble = (context: any = null) => {
 
 /**
  * @description Retrieves all of the typefaces (`FontName`) from a selection of text nodes
- * and returns them as a unique array (no repeats).
+ * and returns them as a unique array (without repeats).
  *
  * @kind function
  * @name readTypefaces
  *
+ * @param {Array} textNodes Array of the text next (`TextNode`) to retrieve typefaces from.
+ *
  * @returns {Array} Returns an array of unique `FontName` entries (no repeats).
  */
-const readTypefaces = (textNodes) => {
+const readTypefaces = (textNodes: Array<TextNode>) => {
   const uniqueTypefaces: Array<FontName> = [];
 
   // take the typeface and, if new/unique, add it to the `uniqueTypefaces` array
@@ -51,6 +53,7 @@ const readTypefaces = (textNodes) => {
         && foundItem.style === typeface.style),
     );
 
+    // typeface is not present; add it to the array
     if (itemIndex < 0) {
       uniqueTypefaces.push(typeface);
     }

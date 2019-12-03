@@ -110,13 +110,13 @@ export default class Crawler {
     return flatSelection;
   }
 
-  /** WIP
+  /**
    * @description Looks into the selection array for any groups and pulls out
    * individual TextNode layers.
    *
    * @kind function
    * @name text
-   * @param {bool} includeLocked Determines whether or not locked layers are included
+   * @param {boolean} includeLocked Determines whether or not locked layers are included
    * in the selection.
    *
    * @returns {Array} All TextNode items in an array.
@@ -128,7 +128,7 @@ export default class Crawler {
     // filter and retain immediate text nodes
     let textNodes: Array<TextNode> = layers.filter((node: SceneNode) => node.type === 'TEXT');
 
-    // iterate through components
+    // iterate through components to find additional text nodes
     const componentNodes: Array<ComponentNode | InstanceNode> = layers.filter((node: SceneNode) => ((node.type === 'COMPONENT' || node.type === 'INSTANCE') && node.visible));
     if (componentNodes) {
       componentNodes.forEach((componentNode: ComponentNode | InstanceNode) => {

@@ -104,14 +104,14 @@ const initLanguages = (): void => {
   return null;
 };
 
-/** WIP
- * @description Compiles the plugin’s options form elements into an object formatted for
- * consumption in the main thread.
+/**
+ * @description Compiles the plugin options form elements in the webview DOM into an object
+ * formatted for consumption in the main thread.
  *
  * @kind function
  * @name readOptions
  *
- * @returns {Object} option Includes an array of languages to translate, the action to take
+ * @returns {Object} options Includes an array of languages to translate, the action to take
  * on the text blocks, and whether or not to ignore locked layers.
  */
 const readOptions = () => {
@@ -180,15 +180,16 @@ const watchActions = (): void => {
 
 /* process Messages from the plugin */
 
-/** WIP
- * @description Compiles the plugin’s options form elements into an object formatted for
- * consumption in the main thread.
+/**
+ * @description Sets the plugin’s form elements in the webview DOM to the correct options.
  *
  * @kind function
  * @name setOptions
  *
- * @returns {Object} option Includes an array of languages to translate, the action to take
+ * @param {Object} options Should include an array of languages to translate, the action to take
  * on the text blocks, and whether or not to ignore locked layers.
+ *
+ * @returns {null}
  */
 const setOptions = (options: {
   action: 'duplicate' | 'replace' | 'new-page',
@@ -228,7 +229,10 @@ const setOptions = (options: {
     translateLockedElement.checked = translateLocked;
   }
 
+  // tell the main thread that the plugin has loaded
   sendLoadedMsg();
+
+  return null;
 };
 
 /**
