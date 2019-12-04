@@ -5,10 +5,6 @@ import {
 } from './Tools';
 import { DATA_KEYS, LANGUAGES } from './constants';
 
-// --- private functions for drawing/positioning annotation elements in the Figma file
-// TKTK
-
-
 // --- main Painter class function
 /**
  * @description A class to add elements directly onto Figma file frames.
