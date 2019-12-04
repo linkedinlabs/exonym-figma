@@ -254,24 +254,6 @@ const GUI_SETTINGS = {
   },
 };
 
-/**
- * @description An object containing the sets of typefaces in-use by the plugin.
- *
- * @kind constant
- * @name TYPEFACES
- * @type {Object}
- */
-const TYPEFACES = {
-  primary: {
-    family: 'Helvetica Neue',
-    style: 'Regular',
-  },
-  secondary: {
-    family: 'Roboto',
-    style: 'Regular',
-  },
-};
-
 export {
   DATA_KEYS,
   FRAME_TYPES,
@@ -279,6 +261,5 @@ export {
   LANGUAGES,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
-  TYPEFACES,
 };
 /* eslint-enable import/prefer-default-export */
