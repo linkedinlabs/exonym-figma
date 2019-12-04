@@ -50,8 +50,13 @@ const FRAME_TYPES = {
   main: 'FRAME',
 };
 
-/** WIP
- * @description An object containing `height`/`width` settings for the plugin GUI window.
+/**
+ * @description An array of languages offered in the plugin for translation. The list is split
+ * into two groups: `addl` and `core`. Core languages are listed first in the translation
+ * menus. Languages are listed in the order that they appear in this array. Each language should
+ * contain a `name`, an `id` that corresponds to the ID used in the Microsoft Translator API,
+ * and the afforementioned `group`. If the language contains characters that are not widely
+ * supported by all typefaces, you may also provide a `font`, formatted like Figma’s `FontName`.
  *
  * @kind constant
  * @name LANGUAGES
