@@ -335,9 +335,9 @@ h3 {
 
 .select-menu__list-item {
   font-family: "Inter", sans-serif;
-  font-weight: 400;
+  font-weight: 300;
   /*font-size: 12px;*/
-  font-size: 13px;
+  font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.005em;
   display: -webkit-box;
@@ -357,7 +357,8 @@ h3 {
   opacity: 1 !important;
 }
 
-.select-menu__list-item:hover {
+.select-menu__list-item:hover,
+.select-menu__list-item--indicate {
   background-color: #18a0fb;
 }
 
