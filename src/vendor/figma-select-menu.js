@@ -42,6 +42,7 @@
 
     const changeMenuValue = () => {
       let currentlySelectedItem = document.querySelector(`.${selector}__list--active .${selector}__list-item--indicate`);
+      const previouslySelectedItem = document.querySelector(`.${selector}__list--active .${selector}__list-item--active`);
       if (!currentlySelectedItem) {
         currentlySelectedItem = document.querySelector(`.${selector}__list--active .${selector}__list-item--active`);
       }
@@ -53,6 +54,16 @@
       let selectItemsLen = selectItems.length;
       let event = new Event('change');
 
+      // update the faux menu selected item
+      previouslySelectedItem.classList.remove(`${selector}__list-item--active`);
+      currentlySelectedItem.classList.add(`${selector}__list-item--active`);
+
+      // update the dropdown button
+      const button = dropdown.parentNode.querySelector('BUTTON');
+      const buttonLabel = button.querySelector('.' + selector + '__button-label');
+      buttonLabel.textContent = currentlySelectedItem.textContent;
+
+      // update the actual select input
       selectItems.forEach((item) => {
         item.removeAttribute("selected");
       });
@@ -71,6 +82,8 @@
 
       // remove the key listener
       document.removeEventListener('keydown', watchKeys, false);
+
+      closeMenu();
     }
 
     const selectNext = (direction) => {
