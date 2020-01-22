@@ -380,13 +380,14 @@
       }
 
       // scroll menu so that selected item is visible
+      const dropdownHeight = dropdown.offsetHeight;
       const selectedItem = dropdown.querySelector('.' + selector + '__list-item--active');
-      const selectedItemTopOffset = selectedItem.getBoundingClientRect().top + window.scrollY
       const selectedItemHeight = selectedItem.offsetHeight;
+      const selectedItemTopOffset = selectedItem.getBoundingClientRect().top + window.scrollY
       const refreshedMenuTopInnerOffset = dropdown.getBoundingClientRect().top + window.scrollY;
 
-      if ((selectedItemTopOffset - 8) > buttonTopOffset) {
-        const scrollPoint = selectedItemTopOffset - (buttonTopOffset - refreshedMenuTopInnerOffset);
+      if ((selectedItemTopOffset < 0) || ((selectedItemTopOffset + selectedItemHeight) > dropdownHeight)) {
+        const scrollPoint = selectedItemTopOffset - refreshedMenuTopInnerOffset;
         dropdown.scrollTop = scrollPoint;
       }
     } else if (element.tagName == 'LI') {
