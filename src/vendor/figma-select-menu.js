@@ -87,12 +87,22 @@
           // grab the previous sibling
           nextSelectedItem = currentlySelectedItem.previousSibling;
 
+          // skip over separators
+          if (nextSelectedItem && nextSelectedItem.tagName !== 'LI') {
+            nextSelectedItem = nextSelectedItem.previousSibling;
+          }
+
           // if the previous sibling is missing, must be at the top
           // grab the last element in the list
           if (!nextSelectedItem) {
             nextSelectedItem = currentlySelectedItem.parentNode.lastChild;
           }
         } else {
+          // skip over separators
+          if (nextSelectedItem && nextSelectedItem.tagName !== 'LI') {
+            nextSelectedItem = nextSelectedItem.nextSibling;
+          }
+
           // if the next sibling is missing, must be at the bottom
           // grab the first element in the list
           if (!nextSelectedItem) {
@@ -236,8 +246,9 @@
     element.parentNode.insertBefore(selectWrapper, element);
     selectWrapper.className = selector;
     if (element.disabled) {
-      selectWrapper.classList.add(selector + '--disabled');
+      selectWrapper.classList.add(selector + '--disabled')
     }
+
     // create unique ID and add it to both wrapper and original select element
     var wrapperId = ('id-' + Date.now() + Math.random()).replace('.', '-');
     selectWrapper.setAttribute('data-select-id', wrapperId);
@@ -385,6 +396,7 @@
       let listItems = dropdown.getElementsByTagName('LI');
       for (let i = 0; i < listItems.length; i++) {
         listItems[i].classList.remove(selector + '__list-item--active');
+        listItems[i].classList.remove(selector + '__list-item--indicate');
       }
 
       // add active class
