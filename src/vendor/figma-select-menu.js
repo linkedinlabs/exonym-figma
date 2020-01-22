@@ -259,7 +259,7 @@
     element.parentNode.insertBefore(selectWrapper, element);
     selectWrapper.className = selector;
     if (element.disabled) {
-      selectWrapper.classList.add(selector + '--disabled')
+      selectWrapper.classList.add(selector + '--disabled');
     }
 
     // create unique ID and add it to both wrapper and original select element
