@@ -10,18 +10,18 @@ import { DATA_KEYS, LANGUAGES } from './constants';
  *
  * @constructor
  *
- * @property layer The SceneNode in the Figma file that we want to annotate or modify.
- * @property page The page (`PageNode`) containing the corresponding `frame`, `layer`,
+ * @property node The SceneNode in the Figma file that we want to annotate or modify.
+ * @property page The page (`PageNode`) containing the corresponding `frame`, `node`,
  * and `textLayer`.
  * @property textLayer A text node (`TextNode`) to manipulate.
  */
 export default class Painter {
-  layer: SceneNode;
+  node: SceneNode;
   page: PageNode;
   textLayer: TextNode;
-  constructor({ for: layer, in: page }) {
-    this.layer = layer;
-    this.textLayer = isTextNode(this.layer) ? this.layer : null;
+  constructor({ for: node, in: page }) {
+    this.node = node;
+    this.textLayer = isTextNode(this.node) ? this.node : null;
     this.page = page;
   }
 
@@ -53,22 +53,22 @@ export default class Painter {
       },
     };
 
-    // set up initial layer spacing
+    // set up initial node spacing
     let spacingBuffer: number = 56;
-    if ((this.layer.height / (1.5)) < spacingBuffer) {
-      spacingBuffer = (this.layer.height / (1.5));
+    if ((this.node.height / (1.5)) < spacingBuffer) {
+      spacingBuffer = (this.node.height / (1.5));
     }
 
     // create text node + update characters and typeface
-    const newNode: SceneNode = this.layer.clone();
-    newPage ? newPage.appendChild(newNode) : this.layer.parent.appendChild(newNode);
+    const newNode: SceneNode = this.node.clone();
+    newPage ? newPage.appendChild(newNode) : this.node.parent.appendChild(newNode);
 
-    // force unlock - no one expects new layers to be locked
+    // force unlock - no one expects new nodes to be locked
     newNode.locked = false;
 
     // placement
-    newNode.x = this.layer.x + spacingBuffer;
-    newNode.y = this.layer.y + spacingBuffer;
+    newNode.x = this.node.x + spacingBuffer;
+    newNode.y = this.node.y + spacingBuffer;
     result.node = newNode;
 
     // return a successful result
@@ -100,9 +100,9 @@ export default class Painter {
       },
     };
 
-    // load list of translations for the layer from Settings
+    // load list of translations for the node from Settings
     const existingTranslations = JSON.parse(
-      this.layer.getPluginData(DATA_KEYS.translations) || null,
+      this.node.getPluginData(DATA_KEYS.translations) || null,
     );
 
     // if there are no translations, return with error
@@ -117,7 +117,7 @@ export default class Painter {
     const unpaintedTranslations = existingTranslations.filter(translation => !translation.painted);
     let updatedTranslations = existingTranslations;
 
-    // update the layer’s text with the translation
+    // update the node’s text with the translation
     unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
       // select the node to update
       const textNode: TextNode = this.textLayer;
@@ -155,7 +155,7 @@ export default class Painter {
       translation.painted = true; // eslint-disable-line no-param-reassign
       updatedTranslations = updateArray(updatedTranslations, translation, 'to');
 
-      // update layer settings with a new originalText
+      // update node settings with a new originalText
       const newOriginalText: {
         text: string,
         from: string,
@@ -171,7 +171,7 @@ export default class Painter {
     });
 
     // commit updated list of translations to Settings
-    this.layer.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
+    this.node.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
 
     // return a successful result
     result.status = 'success';
