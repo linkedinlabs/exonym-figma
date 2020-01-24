@@ -1,42 +1,91 @@
-import { findFrame } from './Tools';
-
-// --- private functions for drawing/positioning annotation elements in the Figma file
-// TKTK
-
+import { isTextNode, updateArray } from './Tools';
+import { DATA_KEYS, LANGUAGES } from './constants';
 
 // --- main Painter class function
 /**
- * @description A class to add elements directly onto Figma file frames.
+ * @description A class to manipulate elements directly in the Figma file.
  *
  * @class
  * @name Painter
  *
  * @constructor
  *
- * @property layer The SceneNode in the Figma file that we want to annotate or modify.
- * @property frame The top-level FrameNode in the Figma file that we want to annotate or modify.
- * @property page The PageNode in the Figma file containing the corresponding `frame` and `layer`.
+ * @property node The SceneNode in the Figma file that we want to annotate or modify.
+ * @property page The page (`PageNode`) containing the corresponding `frame`, `node`,
+ * and `textLayer`.
+ * @property textLayer A text node (`TextNode`) to manipulate.
  */
 export default class Painter {
-  layer: TextNode;
-  frame: FrameNode;
+  node: SceneNode;
   page: PageNode;
-  constructor({ for: layer, in: page }) {
-    this.layer = layer;
-    this.frame = findFrame(this.layer);
+  textLayer: TextNode;
+  constructor({ for: node, in: page }) {
+    this.node = node;
+    this.textLayer = isTextNode(this.node) ? this.node : null;
     this.page = page;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
+  /**
+   * @description Duplicates a node and, by default, places it near the original node. If
+   a `newPage` node is passed, the duplicated `SceneNode` will be placed on a new page.
    *
    * @kind function
-   * @name duplicateText
+   * @name duplicate
+   *
+   * @param {Object} newPage A page node (`PageNode`) to move the duplicated node to (optional).
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
-  duplicateText(languageTypeface?: FontName) {
+  duplicate(newPage?: PageNode) {
+    const result: {
+      node: SceneNode,
+      status: 'error' | 'success',
+      messages: {
+        toast: string,
+        log: string,
+      },
+    } = {
+      node: null,
+      status: null,
+      messages: {
+        toast: null,
+        log: null,
+      },
+    };
+
+    // set up initial node spacing
+    let spacingBuffer: number = 56;
+    if ((this.node.height / (1.5)) < spacingBuffer) {
+      spacingBuffer = (this.node.height / (1.5));
+    }
+
+    // create text node + update characters and typeface
+    const newNode: SceneNode = this.node.clone();
+    newPage ? newPage.appendChild(newNode) : this.node.parent.appendChild(newNode);
+
+    // force unlock - no one expects new nodes to be locked
+    newNode.locked = false;
+
+    // placement
+    newNode.x = this.node.x + spacingBuffer;
+    newNode.y = this.node.y + spacingBuffer;
+    result.node = newNode;
+
+    // return a successful result
+    result.status = 'success';
+    return result;
+  }
+
+  /**
+   * @description Retrieves unpainted translation(s) from a node’s data, updates the `textNode`
+   * characters to match, and updates the node data to mark the translation(s) as painted.
+   *
+   * @kind function
+   * @name replaceText
+   *
+   * @returns {Object} A result object container success/error status and log/toast messages.
+   */
+  replaceText() {
     const result: {
       status: 'error' | 'success',
       messages: {
@@ -51,34 +100,10 @@ export default class Painter {
       },
     };
 
-    // TKTK move to Tools
-    const updateArray = (array, item, itemKey: string = 'id', action: 'add' | 'remove' = 'add') => {
-      let updatedArray = array;
-
-      // find the index of a pre-existing `id` match on the array
-      const itemIndex: number = updatedArray.findIndex(
-        foundItem => (foundItem[itemKey] === item[itemKey]),
-      );
-
-      // if a match exists, remove it
-      // even if the action is `add`, always remove the existing entry to prevent duplicates
-      if (itemIndex > -1) {
-        updatedArray = [
-          ...updatedArray.slice(0, itemIndex),
-          ...updatedArray.slice(itemIndex + 1),
-        ];
-      }
-
-      // if the `action` is `add` (or update), append the new `item` to the array
-      if (action === 'add') {
-        updatedArray.push(item);
-      }
-
-      return updatedArray;
-    };
-
-    // load list of translations for the layer from Settings
-    const existingTranslations = JSON.parse(this.layer.getPluginData('translations'));
+    // load list of translations for the node from Settings
+    const existingTranslations = JSON.parse(
+      this.node.getPluginData(DATA_KEYS.translations) || null,
+    );
 
     // if there are no translations, return with error
     if (!existingTranslations) {
@@ -92,101 +117,61 @@ export default class Painter {
     const unpaintedTranslations = existingTranslations.filter(translation => !translation.painted);
     let updatedTranslations = existingTranslations;
 
-    // set up initial layer spacing
-    let spacingBuffer: number = 56;
-    if ((this.layer.height / (1.5)) < spacingBuffer) {
-      spacingBuffer = (this.layer.height / (1.5));
-    }
-    let currentSpacingBuffer = spacingBuffer;
-
-    // clone the initial layer and update the text with the translation
+    // update the node’s text with the translation
     unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
-      const updatedCharacters: string = translation.text;
+      // select the node to update
+      const textNode: TextNode = this.textLayer;
 
-      // create text node + update characters
-      const newTextNode: TextNode = this.layer.clone();
-      if (languageTypeface) {
-        newTextNode.fontName = languageTypeface;
+      // add previous originalText to the translations list as a translation
+      const originalText: {
+        text: string,
+        from: string,
+      } = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
+      if (originalText && originalText.text === textNode.characters) {
+        const newTranslation: {
+          text: string,
+          to: string,
+          painted: boolean,
+        } = {
+          text: textNode.characters,
+          to: originalText.from,
+          painted: true,
+        };
+
+        // add/update the translations array with the original text
+        updatedTranslations = updateArray(updatedTranslations, newTranslation, 'to');
       }
-      newTextNode.characters = updatedCharacters;
 
-      // placement
-      newTextNode.x = this.layer.x + currentSpacingBuffer;
-      newTextNode.y = this.layer.y + currentSpacingBuffer;
-      newTextNode.name = `${translation.to}: ${newTextNode.name}`;
-      this.layer.parent.appendChild(newTextNode);
-
-      currentSpacingBuffer += spacingBuffer;
+      // update (replace) the text + update typeface, if necessary
+      const updatedCharacters: string = translation.text;
+      const languageConstant = LANGUAGES.find(language => language.id === translation.to);
+      const languageTypeface = languageConstant.font;
+      if (languageTypeface) {
+        textNode.fontName = languageTypeface;
+      }
+      textNode.characters = updatedCharacters;
 
       // flip the painted flag + update the overall array
       translation.painted = true; // eslint-disable-line no-param-reassign
       updatedTranslations = updateArray(updatedTranslations, translation, 'to');
+
+      // update node settings with a new originalText
+      const newOriginalText: {
+        text: string,
+        from: string,
+      } = {
+        text: updatedCharacters,
+        from: translation.to,
+      };
+
+      textNode.setPluginData(
+        DATA_KEYS.originalText,
+        JSON.stringify(newOriginalText),
+      );
     });
 
     // commit updated list of translations to Settings
-    this.layer.setPluginData('translations', JSON.stringify(updatedTranslations));
-
-    // return a successful result
-    result.status = 'success';
-    return result;
-  }
-
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
-   *
-   * @kind function
-   * @name replaceText
-   *
-   * @returns {Object} A result object container success/error status and log/toast messages.
-   */
-  replaceText(languageTypeface?: FontName) {
-    const result: {
-      status: 'error' | 'success',
-      messages: {
-        toast: string,
-        log: string,
-      },
-    } = {
-      status: null,
-      messages: {
-        toast: null,
-        log: null,
-      },
-    };
-
-    // TKTK
-    // const layerSettings = getLayerSettings(this.page, this.layer.id);
-
-    // if (!layerSettings || (layerSettings && !layerSettings.annotationText)) {
-    //   result.status = 'error';
-    //   result.messages.log = 'Layer missing annotationText';
-    //   return result;
-    // }
-
-    const updatedCharacters: string = `${this.layer.characters}… and some more!`;
-
-    // create text node + update characters
-    const textNode: TextNode = this.layer;
-    if (languageTypeface) {
-      textNode.fontName = languageTypeface;
-    }
-    textNode.characters = updatedCharacters;
-
-    // // update the `newPageSettings` array TKTK
-    // let newPageSettings = JSON.parse(this.page.getPluginData(PLUGIN_IDENTIFIER) || null);
-    // newPageSettings = updateArray(
-    //   'annotatedLayers',
-    //   newAnnotatedLayerSet,
-    //   newPageSettings,
-    //   'add',
-    // );
-
-    // // commit the `Settings` update
-    // this.page.setPluginData(
-    //   PLUGIN_IDENTIFIER,
-    //   JSON.stringify(newPageSettings),
-    // );
+    this.node.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
 
     // return a successful result
     result.status = 'success';

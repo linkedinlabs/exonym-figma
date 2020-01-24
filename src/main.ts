@@ -1,6 +1,8 @@
 // ++++++++++++++++++++++++++ Specter for Figma +++++++++++++++++++++++++++
 import App from './App';
-import { GUI_SETTINGS } from './constants';
+import Messenger from './Messenger';
+import { awaitUIReadiness } from './Tools';
+import { DATA_KEYS, LANGUAGES } from './constants';
 
 // GUI management -------------------------------------------------
 
@@ -8,31 +10,13 @@ import { GUI_SETTINGS } from './constants';
  * @description Shuts down the plugin and closes the GUI.
  *
  * @kind function
- * @name closeGUI
+ * @name terminatePlugin
  *
  * @returns {null}
  */
-const closeGUI = (): void => {
-  // close the UI without suppressing error messages
+const terminatePlugin = (): void => {
+  // close the plugin without suppressing error messages
   figma.closePlugin();
-  return null;
-};
-
-/**
- * @description Enables the plugin GUI within Figma.
- *
- * @kind function
- * @name showGUI
- *
- * @returns {null} Shows a Toast in the UI if nothing is selected.
- */
-const showGUI = (): void => {
-  // show UI – command: tools
-  figma.showUI(__html__, { // eslint-disable-line no-undef
-    width: GUI_SETTINGS.default.width,
-    height: GUI_SETTINGS.default.height,
-  });
-
   return null;
 };
 
@@ -50,11 +34,11 @@ const showGUI = (): void => {
  * command came from the GUI or the menu.
  * @returns {null}
  */
-const dispatcher = (action: {
+const dispatcher = async (action: {
   type: string,
   payload?: any,
   visual: boolean,
-}): void => {
+}) => {
   const { type, payload, visual } = action;
 
   // if the action is not visual, close the plugin after running
@@ -62,20 +46,83 @@ const dispatcher = (action: {
 
   // pass along some GUI management and navigation functions to the App class
   const app = new App({
-    closeGUI,
-    dispatcher,
     shouldTerminate,
-    showGUI,
+    terminatePlugin,
   });
 
   // run the action in the App class based on type
-  const runAction = () => {
+  const runAction = async () => {
+    let quickTranslatePayload = null;
+
+    // retrieve existing options
+    const lastUsedOptions: {
+      action: 'duplicate' | 'replace' | 'new-page',
+      translateLocked: boolean,
+      languages: Array<string>,
+    } = await figma.clientStorage.getAsync(DATA_KEYS.options);
+
+    const setTranslatePayload = (quickTranslateType: string) => {
+      // set language to use
+      const language: string = quickTranslateType.replace('quick-translate-', '');
+
+      // set preliminary options
+      const options: {
+        languages: Array<string>,
+        action: 'duplicate' | 'replace' | 'new-page',
+        translateLocked: boolean,
+      } = {
+        languages: [language],
+        action: 'duplicate',
+        translateLocked: false,
+      };
+
+      // set core options
+      if (
+        lastUsedOptions
+        && lastUsedOptions.action !== undefined
+        && lastUsedOptions.translateLocked !== undefined
+      ) {
+        options.action = lastUsedOptions.action;
+        options.translateLocked = lastUsedOptions.translateLocked;
+      }
+
+      // set last-used language, if necessary
+      if (language === 'last') {
+        if (lastUsedOptions && lastUsedOptions.languages !== undefined) {
+          options.languages = lastUsedOptions.languages;
+        } else {
+          const index = 0;
+          const firstCoreLanguage = LANGUAGES.filter(lang => lang.group === 'core')[index];
+          options.languages = [firstCoreLanguage.id];
+        }
+      }
+
+      // commit options to payload
+      quickTranslatePayload = options;
+    };
+
+    const verifyQuickType = (quickType): boolean => {
+      const typeSimplified = quickType.replace('quick-translate-', '');
+      if (typeSimplified
+        && (typeSimplified === 'last' || LANGUAGES.filter(lang => lang.id === typeSimplified))
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     switch (type) {
       case 'submit':
-        app.doAThing(payload);
+        app.runTranslate(payload, true);
+        break;
+      case String(type.match(/^quick-translate-.*/)):
+        if (verifyQuickType(type)) {
+          setTranslatePayload(type);
+          app.runTranslate(quickTranslatePayload, false);
+        }
         break;
       default:
-        showGUI();
+        App.showToolbar();
     }
   };
 
@@ -94,8 +141,17 @@ export default dispatcher;
  *
  * @returns {null}
  */
-const main = (): void => {
-  // watch menu commands -------------------------------------------------
+const main = async () => {
+  // set up logging
+  const messenger = new Messenger({ for: figma, in: figma.currentPage });
+
+  // set up the UI, hidden by default -----------------------------------------
+  figma.showUI(__html__, { visible: false }); // eslint-disable-line no-undef
+
+  // make sure UI has finished setting up
+  await awaitUIReadiness(messenger);
+
+  // watch menu commands ------------------------------------------------------
   if (figma.command) {
     dispatcher({
       type: figma.command,
@@ -103,7 +159,7 @@ const main = (): void => {
     });
   }
 
-  // watch GUI action clicks -------------------------------------------------
+  // watch GUI action clicks --------------------------------------------------
   figma.ui.onmessage = (msg: { action: string, payload: any }): void => {
     const { action, payload } = msg;
 
