@@ -7,7 +7,7 @@ import { DATA_KEYS, LANGUAGES } from './constants';
 
 // --- main Painter class function
 /**
- * @description A class to add elements directly onto Figma file frames.
+ * @description A class to manipulate elements directly in the Figma file.
  *
  * @class
  * @name Painter
@@ -15,8 +15,10 @@ import { DATA_KEYS, LANGUAGES } from './constants';
  * @constructor
  *
  * @property layer The SceneNode in the Figma file that we want to annotate or modify.
- * @property frame The top-level FrameNode in the Figma file that we want to annotate or modify.
- * @property page The PageNode in the Figma file containing the corresponding `frame` and `layer`.
+ * @property frame The top-level frame node (`FrameNode`) that we want to annotate or modify.
+ * @property page The page (`PageNode`) containing the corresponding `frame`, `layer`,
+ * and `textLayer`.
+ * @property textLayer A text node (`TextNode`) to manipulate.
  */
 export default class Painter {
   layer: SceneNode;
@@ -30,12 +32,14 @@ export default class Painter {
     this.page = page;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
+  /**
+   * @description Duplicates a node and, by default, places it near the original node. If
+   a `newPage` node is passed, the duplicated `SceneNode` will be placed on a new page.
    *
    * @kind function
    * @name duplicate
+   *
+   * @param {Object} newPage A page node (`PageNode`) to move the duplicated node to (optional).
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
@@ -79,9 +83,9 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
+  /**
+   * @description Retrieves unpainted translation(s) from a node’s data, updates the `textNode`
+   * characters to match, and updates the node data to mark the translation(s) as painted.
    *
    * @kind function
    * @name replaceText
