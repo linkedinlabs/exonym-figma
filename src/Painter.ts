@@ -1,8 +1,4 @@
-import {
-  findTopFrame,
-  isTextNode,
-  updateArray,
-} from './Tools';
+import { isTextNode, updateArray } from './Tools';
 import { DATA_KEYS, LANGUAGES } from './constants';
 
 // --- main Painter class function
@@ -15,20 +11,17 @@ import { DATA_KEYS, LANGUAGES } from './constants';
  * @constructor
  *
  * @property layer The SceneNode in the Figma file that we want to annotate or modify.
- * @property frame The top-level frame node (`FrameNode`) that we want to annotate or modify.
  * @property page The page (`PageNode`) containing the corresponding `frame`, `layer`,
  * and `textLayer`.
  * @property textLayer A text node (`TextNode`) to manipulate.
  */
 export default class Painter {
   layer: SceneNode;
-  frame?: FrameNode;
   page: PageNode;
   textLayer: TextNode;
   constructor({ for: layer, in: page }) {
     this.layer = layer;
     this.textLayer = isTextNode(this.layer) ? this.layer : null;
-    this.frame = findTopFrame(this.layer);
     this.page = page;
   }
 
