@@ -96,6 +96,10 @@ h3 {
   height: 32px;
 }
 
+.container .button.working {
+  opacity: 0.5;
+}
+
 /*
   boilerplate
   source: Tom Lowry's Figma UI JS/CSS files
@@ -321,19 +325,14 @@ h3 {
 .container.padding ul.select-menu__list { padding: 8px 0 8px 0; }
 
 .select-menu__list--active {
-  /*display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;*/
   display: block;
   overflow-y: scroll;
-  height: 206px;
 }
 
 .select-menu__list-item {
   font-family: "Inter", sans-serif;
-  font-weight: 400;
-  /*font-size: 12px;*/
-  font-size: 13px;
+  font-weight: 300;
+  font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.005em;
   display: -webkit-box;
@@ -353,7 +352,8 @@ h3 {
   opacity: 1 !important;
 }
 
-.select-menu__list-item:hover {
+.select-menu__list-item:hover,
+.select-menu__list-item--indicate {
   background-color: #18a0fb;
 }
 

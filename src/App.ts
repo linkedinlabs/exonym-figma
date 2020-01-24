@@ -1,8 +1,8 @@
 import Crawler from './Crawler';
 import Messenger from './Messenger';
 import Painter from './Painter';
+import Translator from './Translator';
 import {
-  asyncNetworkRequest,
   awaitUIReadiness,
   loadTypefaces,
   readLanguageTypefaces,
@@ -32,6 +32,57 @@ const assemble = (context: any = null) => {
 };
 
 /**
+ * @description Retrieves all of the typefaces (`FontName`) from a selection of text nodes
+ * and returns them as a unique array (without repeats).
+ *
+ * @kind function
+ * @name readTypefaces
+ *
+ * @param {Array} textNodes Array of the text next (`TextNode`) to retrieve typefaces from.
+ *
+ * @returns {Array} Returns an array of unique `FontName` entries (no repeats).
+ */
+const readTypefaces = (textNodes: Array<TextNode>) => {
+  const uniqueTypefaces: Array<FontName> = [];
+
+  // take the typeface and, if new/unique, add it to the `uniqueTypefaces` array
+  const setTypeFace = (typeface: FontName) => {
+    const itemIndex: number = uniqueTypefaces.findIndex(
+      (foundItem: FontName) => (
+        (foundItem.family === typeface.family)
+        && foundItem.style === typeface.style),
+    );
+
+    // typeface is not present; add it to the array
+    if (itemIndex < 0) {
+      uniqueTypefaces.push(typeface);
+    }
+  };
+
+  // iterate through each text node
+  textNodes.forEach((textNode: TextNode) => {
+    if (!textNode.hasMissingFont) {
+      // some text nodes have multiple typefaces and the API returns a `figma.mixed` Symbol
+      if (typeof textNode.fontName !== 'symbol') {
+        // if a node does not return `fontName` as a Symbol, we can use the result directly
+        const typeface: any = textNode.fontName;
+        setTypeFace(typeface);
+      } else {
+        // use `getRangeFontName` to check each character (based on index) for its typeface
+        const { characters } = textNode;
+        const length: number = characters.length; // eslint-disable-line prefer-destructuring
+        for (let i = 0; i < length; i += 1) {
+          const typeface: any = textNode.getRangeFontName(i, i + 1);
+          setTypeFace(typeface);
+        }
+      }
+    }
+  });
+
+  return uniqueTypefaces;
+};
+
+/**
  * @description A class to handle core app logic and dispatch work to other classes.
  *
  * @class
@@ -55,14 +106,18 @@ export default class App {
     this.terminatePlugin = terminatePlugin;
   }
 
-  /** WIP
-   * @description Enables the plugin GUI within Figma.
+  /**
+   * @description Displays the plugin GUI within Figma. Before showing the UI, it
+   * reads saved options from `clientStorage` and passes them along to the UI thread.
    *
    * @kind function
    * @name showGUI
-   * @param {string} size An optional param calling one of the UI sizes defined in GUI_SETTINGS.
    *
-   * @returns {null} Shows a Toast in the UI if nothing is selected.
+   * @param {Object} options Should include `size`, calling one of the UI sizes defined
+   * in GUI_SETTINGS, and an optional initialized instance of the Messenger class for
+   * logging (`messenger`).
+   *
+   * @returns {null}
    */
   static async showGUI(options: {
     size: 'default' | 'info',
@@ -77,7 +132,7 @@ export default class App {
     if (size === 'default') {
       // retrieve existing options
       const lastUsedOptions: {
-        action: 'duplicate' | 'replace',
+        action: 'duplicate' | 'replace' | 'new-page',
         translateLocked: boolean,
         languages: Array<string>,
       } = await figma.clientStorage.getAsync(DATA_KEYS.options);
@@ -115,18 +170,25 @@ export default class App {
     App.showGUI({ size: 'default', messenger });
   }
 
-  /** WIP
-   * @description Does a thing.
+  /**
+   * @description The main action for translating text.
    *
    * @kind function
-   * @name translate
+   * @name runTranslate
    *
-   * @returns {null} Shows a Toast in the UI if nothing is selected.
+   * @param {Object} options Should include the `languages` array of IDs that correspond with
+   * the `LANGUAGES` constant, an `action` (`duplicate`, `replace`, or `new-page`), and a
+   * boolean determining whether or not to ignore locked nodes (`translateLocked`).
+   * @param {boolean} savePrefs Determines if the current options should be saved
+   * for future reference.
+   *
+   * @returns {Function} Calls `closeOrReset` to either terminate the plugin, or reset
+   * the state of the UI.
    */
-  translate(
+  async runTranslate(
     options: {
       languages: Array<string>,
-      action: 'duplicate' | 'replace',
+      action: 'duplicate' | 'replace' | 'new-page',
       translateLocked: boolean,
     },
     savePrefs: boolean,
@@ -136,68 +198,30 @@ export default class App {
       page,
       selection,
     } = assemble(figma);
-    const { action, translateLocked } = options;
+    const {
+      action,
+      languages,
+      translateLocked,
+    } = options;
     let consolidatedSelection: Array<SceneNode | PageNode> = selection;
 
     // retrieve selection of text nodes and filter for locked/unlocked based on options
     let textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
 
-    // if action is `duplicate`, need to duplicate the layers first
-    if (textNodes.length > 0 && action === 'duplicate') {
-      consolidatedSelection = [];
-
-      selection.forEach((node) => {
-        // set up Painter instance for the layer
-        const painter = new Painter({ for: node, in: page });
-
-        // duplicate the layer
-        const newNodeResult = painter.duplicate();
-        if (newNodeResult.status === 'success') {
-          const newNode = newNodeResult.node;
-          consolidatedSelection.push(newNode);
-        }
-      });
-
-      // reset and retrieve selection of text nodes
-      textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
-    }
-
-    const readTypefaces = () => {
-      const uniqueTypefaces: Array<FontName> = [];
-
-      textNodes.forEach((textNode: TextNode) => {
-        if (!textNode.hasMissingFont) {
-          const typefaceOrSymbol: any = textNode.fontName;
-          const typeface: FontName = typefaceOrSymbol;
-
-          const itemIndex: number = uniqueTypefaces.findIndex(
-            (foundItem: FontName) => (
-              (foundItem.family === typeface.family)
-              && foundItem.style === typeface.style),
-          );
-
-          if (itemIndex < 0) {
-            uniqueTypefaces.push(typeface);
-          }
-        }
-      });
-
-      return uniqueTypefaces;
-    };
-
-    const readText = () => {
-      const textToTranslate: Array<{ text: string }> = [];
-
-      textNodes.forEach((textNode: TextNode) => {
-        textToTranslate.push({ text: textNode.characters });
-      });
-
-      return textToTranslate;
-    };
-
-    const manipulateText = () => {
+    /**
+     * @description Iterates through an array of text nodes (`TextNode`), applying
+     * Painter’s `replaceText` to each and updating the text.
+     *
+     * @kind function
+     * @name manipulateText
+     *
+     * @param {Array} textNodesToPaint An array of text nodes (`TextNode`).
+     *
+     * @returns {null}
+     */
+    const manipulateText = (textNodesToPaint): void => {
       messenger.log('Begin manipulating text');
-      textNodes.forEach((textNode: SceneNode) => {
+      textNodesToPaint.forEach((textNode: SceneNode) => {
         // set up Painter instance for the layer
         const painter = new Painter({ for: textNode, in: page });
 
@@ -206,107 +230,84 @@ export default class App {
         painter.replaceText();
       });
       messenger.log('End manipulating text');
-    };
-
-    const commitTranslationsToLayers = (
-      translations:
-        Array<{
-          detectedLanguage: {
-            language: string,
-          }
-          translations: [{
-            text: string,
-            to: string,
-          }],
-        }>,
-    ): void => {
-      // check for changes to the original text and reset, if necessary
-      const setResetSettings = (
-        textNode: TextNode,
-        detectedLanguage: { language: string },
-      ): void => {
-        const originalText: {
-          text: string,
-          from: string,
-        } = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
-
-        if (!originalText || originalText.text !== textNode.characters) {
-          // set/update original text
-          const newOriginalText: {
-            text: string,
-            from: string,
-          } = {
-            text: textNode.characters,
-            from: detectedLanguage.language,
-          };
-
-          textNode.setPluginData(
-            DATA_KEYS.originalText,
-            JSON.stringify(newOriginalText),
-          );
-
-          // invalidate any existing translations
-          textNode.setPluginData(
-            DATA_KEYS.translations,
-            JSON.stringify([]),
-          );
-        }
-      };
-
-      // iterrate selection and add translations to layer node settings
-      textNodes.forEach((textNode: TextNode, index: number) => {
-        // first check if we need to reset the layer's settings
-        setResetSettings(textNode, translations[index].detectedLanguage);
-
-        // read existing translations for the layer
-        const existingTranslations = JSON.parse(textNode.getPluginData(DATA_KEYS.translations));
-
-        // set or update translations
-        translations[index].translations.forEach((translation: {
-          text: string,
-          to: string,
-          painted?: boolean,
-        }) => {
-          let updated = false;
-
-          existingTranslations.forEach((existingTranslation) => {
-            if (existingTranslation.to === translation.to) {
-              // update text
-              existingTranslation.text = translation.text; // eslint-disable-line no-param-reassign
-              // set painting flag
-              existingTranslation.painted = false; // eslint-disable-line no-param-reassign
-              updated = true;
-            }
-          });
-
-          if (!updated) {
-            translation.painted = false; // eslint-disable-line no-param-reassign
-            existingTranslations.push(translation);
-          }
-        });
-
-        // save the translations on the layer settings
-        textNode.setPluginData(
-          DATA_KEYS.translations,
-          JSON.stringify(existingTranslations),
-        );
-      });
 
       return null;
     };
 
-    const close = () => {
+    /**
+     * @description Resets the plugin GUI back to the original state or closes it entirely,
+     * terminating the plugin.
+     *
+     * @kind function
+     * @name closeOrReset
+     *
+     * @returns {null}
+     */
+    const closeOrReset = () => {
       if (this.shouldTerminate) {
-        this.terminatePlugin();
+        return this.terminatePlugin();
       }
+
+      // reset the working state
+      const message: {
+        action: string,
+      } = {
+        action: 'resetState',
+      };
+      figma.ui.postMessage(message);
+
+      return null;
     };
 
-    const mainAction = async () => {
-      const { languages } = options;
-      const targetLanguages: Array<string> = languages;
-      const typefaces: Array<FontName> = readTypefaces();
-      const languageTypefaces: Array<FontName> = readLanguageTypefaces(targetLanguages);
-      const textToTranslate: Array<{ text: string }> = readText();
+    // begin main thread of action ------------------------------------------------------
+
+    // save current options
+    if (savePrefs) {
+      figma.clientStorage.setAsync(DATA_KEYS.options, options);
+    }
+
+    // if action is `new-page`, need to create a new page first
+    let newPage = null;
+    if (textNodes.length > 0 && action === 'new-page') {
+      newPage = figma.createPage();
+    }
+
+    // if action is `duplicate`, need to duplicate the layers first
+    if (
+      textNodes.length > 0
+      && (action === 'duplicate' || action === 'new-page')
+    ) {
+      consolidatedSelection = [];
+
+      selection.forEach((node) => {
+        // set up Painter instance for the layer
+        const painter = new Painter({ for: node, in: page });
+
+        // duplicate the layer
+        const newNodeResult = painter.duplicate(newPage);
+        if (newNodeResult.status === 'success') {
+          const newNode = newNodeResult.node;
+          consolidatedSelection.push(newNode);
+        }
+      });
+
+      if (newPage && action === 'new-page') {
+        figma.currentPage = newPage;
+        figma.currentPage.selection = newPage.children;
+      }
+
+      // reset and retrieve selection of text nodes
+      textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
+    }
+
+    // translate if text nodes are available and fonts are not missing
+    const missingTypefaces: Array<TextNode> = textNodes.filter(
+      (node: TextNode) => node.hasMissingFont,
+    );
+    if ((textNodes.length > 0) && (missingTypefaces.length < 1)) {
+      // run the main thread this sets everything else in motion
+      const typefaces: Array<FontName> = readTypefaces(textNodes);
+      const languageTypefaces: Array<FontName> = readLanguageTypefaces(languages);
 
       // load typefaces
       if (languageTypefaces) {
@@ -314,57 +315,37 @@ export default class App {
       }
       await loadTypefaces(typefaces, messenger);
 
-      // set up API call
-      const baseUrl: string = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
-      const url: string = `${baseUrl}&to=${targetLanguages.join(',')}`;
-      const headers = {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': process.env.MST_API_KEY,
-      };
+      // do the text translations
+      const translator = new Translator({ for: textNodes, messenger });
+      const translationResult = await translator.translate(languages);
+      messenger.handleResult(translationResult);
 
-      // make API call
-      const data = await asyncNetworkRequest({
-        requestUrl: url,
-        headers,
-        bodyToSend: textToTranslate,
-        messenger,
-      });
-
-      if (data) {
-        // set new translations to the layer's settings
-        commitTranslationsToLayers(data);
-
-        // replace the text
-        manipulateText();
-
-        messenger.log('Text was translated.');
-      } else {
-        messenger.log('Translations could not be completed', 'error');
-        messenger.toast('Unfortunately, text could not be translated.');
+      if (translationResult.status === 'success') {
+        // replace the text in the document
+        manipulateText(textNodes);
       }
 
-      close();
-    };
-
-    // save current options
-    if (savePrefs) {
-      figma.clientStorage.setAsync(DATA_KEYS.options, options);
+      return closeOrReset();
     }
 
-    // translate if text nodes are available
-    if (textNodes.length > 0) {
-      // run the main thread this sets everything else in motion
-      return mainAction();
-    }
+    // otherwise set/display appropriate error messages
+    let toastErrorMessage = 'Something went wrong 😬';
 
-    // otherwise display appropriate error messages
-    messenger.log('No text nodes were selected/found');
-    if (translateLocked) {
-      messenger.toast('❌ You need to select at least one text layer');
+    // set the message + log
+    if (missingTypefaces.length > 0) {
+      toastErrorMessage = textNodes.length > 1
+        ? '❌ One or more select text layers contain missing fonts'
+        : '❌ This text layer contains a missing font';
+      messenger.log('Text node(s) contained missing fonts');
     } else {
-      messenger.toast('❌ You need to select at least one unlocked text layer');
+      toastErrorMessage = translateLocked
+        ? '❌ You need to select at least one text layer'
+        : '❌ You need to select at least one unlocked text layer';
+      messenger.log('No text nodes were selected/found');
     }
 
-    return null;
+    // display the message and terminate the plugin
+    messenger.toast(toastErrorMessage);
+    return closeOrReset();
   }
 }
