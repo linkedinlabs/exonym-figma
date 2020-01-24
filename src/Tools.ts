@@ -230,17 +230,17 @@ const updateArray = (
 };
 
 /**
- * @description Takes a layer object and traverses parent relationships until the top-level
- * `FRAME_TYPES.main` layer is found. Returns the frame layer.
+ * @description Takes a node object and traverses parent relationships until the top-level
+ * `FRAME_TYPES.main` node is found. Returns the frame node.
  *
  * @kind function
  * @name findTopFrame
- * @param {Object} layer A Figma layer object.
+ * @param {Object} node A Figma node object.
  *
- * @returns {Object} The top-level `FRAME_TYPES.main` layer.
+ * @returns {Object} The top-level `FRAME_TYPES.main` node.
  */
-const findTopFrame = (layer: any) => {
-  let { parent } = layer;
+const findTopFrame = (node: any) => {
+  let { parent } = node;
 
   // if the parent is a page, we're done
   if (parent && parent.type === 'PAGE') {
