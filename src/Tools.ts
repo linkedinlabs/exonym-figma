@@ -4,7 +4,6 @@ import {
   LANGUAGES,
 } from './constants';
 
-// --- helper functions
 /**
  * @description An approximation of `forEach` but run in an async manner.
  *

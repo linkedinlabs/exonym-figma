@@ -108,7 +108,7 @@ const initLanguages = (): void => {
  * @kind function
  * @name readOptions
  *
- * @returns {Object} options Includes an array of languages to translate, the action to take
+ * @returns {Object} Includes an array of languages to translate, the action to take
  * on the text blocks, and whether or not to ignore locked layers.
  */
 const readOptions = () => {
@@ -271,7 +271,6 @@ const watchIncomingMessages = (): void => {
     return null;
   };
 };
-
 
 // init GUI
 watchActions();
