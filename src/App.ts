@@ -106,14 +106,18 @@ export default class App {
     this.terminatePlugin = terminatePlugin;
   }
 
-  /** WIP
-   * @description Enables the plugin GUI within Figma.
+  /**
+   * @description Displays the plugin GUI within Figma. Before showing the UI, it
+   * reads saved options from `clientStorage` and passes them along to the UI thread.
    *
    * @kind function
    * @name showGUI
-   * @param {string} size An optional param calling one of the UI sizes defined in GUI_SETTINGS.
    *
-   * @returns {null} Shows a Toast in the UI if nothing is selected.
+   * @param {Object} options Should include `size`, calling one of the UI sizes defined
+   * in GUI_SETTINGS, and an optional initialized instance of the Messenger class for
+   * logging (`messenger`).
+   *
+   * @returns {null}
    */
   static async showGUI(options: {
     size: 'default' | 'info',
@@ -166,13 +170,20 @@ export default class App {
     App.showGUI({ size: 'default', messenger });
   }
 
-  /** WIP
-   * @description Does a thing.
+  /**
+   * @description The main action for translating text.
    *
    * @kind function
    * @name runTranslate
    *
-   * @returns {null} Shows a Toast in the UI if nothing is selected.
+   * @param {Object} options Should include the `languages` array of IDs that correspond with
+   * the `LANGUAGES` constant, an `action` (`duplicate`, `replace`, or `new-page`), and a
+   * boolean determining whether or not to ignore locked nodes (`translateLocked`).
+   * @param {boolean} savePrefs Determines if the current options should be saved
+   * for future reference.
+   *
+   * @returns {Function} Calls `closeOrReset` to either terminate the plugin, or reset
+   * the state of the UI.
    */
   async runTranslate(
     options: {
@@ -197,15 +208,18 @@ export default class App {
     // retrieve selection of text nodes and filter for locked/unlocked based on options
     let textNodes = new Crawler({ for: consolidatedSelection }).text(translateLocked);
 
-    /** WIP
-     * @description Does a thing.
+    /**
+     * @description Iterates through an array of text nodes (`TextNode`), applying
+     * Painter’s `replaceText` to each and updating the text.
      *
      * @kind function
      * @name manipulateText
      *
-     * @returns {null} Shows a Toast in the UI if nothing is selected.
+     * @param {Array} textNodesToPaint An array of text nodes (`TextNode`).
+     *
+     * @returns {null}
      */
-    const manipulateText = (textNodesToPaint) => {
+    const manipulateText = (textNodesToPaint): void => {
       messenger.log('Begin manipulating text');
       textNodesToPaint.forEach((textNode: SceneNode) => {
         // set up Painter instance for the layer
@@ -216,6 +230,8 @@ export default class App {
         painter.replaceText();
       });
       messenger.log('End manipulating text');
+
+      return null;
     };
 
     /**
