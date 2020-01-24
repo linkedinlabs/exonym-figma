@@ -338,12 +338,12 @@ const translateLocal = (options: {
   return { remainingTextNodes };
 };
 
-// --- main Translate class
-/**
+// --- main Translator class
+/** WIP
  * @description A class to handle core app logic and dispatch work to other classes.
  *
  * @class
- * @name App
+ * @name Translator
  *
  * @constructor
  *
@@ -351,7 +351,7 @@ const translateLocal = (options: {
  * at the end of the plugin’s current task.
  * @property terminatePlugin A convenience function for properly shutting down the plugin.
  */
-export default class App {
+export default class Translator {
   textNodes: Array<TextNode>;
   messenger: { log: Function };
 
