@@ -2,7 +2,8 @@
 
 /**
  * @description A unique string to identify the plugin within Figma.
- * Changing this will break data retrieval in any `sharedPluginData` and potentially elsewhere.
+ * Changing one of these keys will break data retrieval or reset data in any
+ * `xPluginData` getters/setters and potentially elsewhere.
  * [More info]{@link https://www.figma.com/plugin-docs/api/properties/nodes-setsharedplugindata/}
  *
  * @kind constant
@@ -22,6 +23,21 @@ const PLUGIN_IDENTIFIER = 'com.linkedin.figma.exonym-plugin';
 const PLUGIN_NAME = 'Exonym';
 
 /**
+ * @description An object containing the current string constants used as keys in plugin data.
+ * Changing one of these keys will break data retrieval or reset data in any
+ * `xPluginData` getters/setters and potentially elsewhere.
+ *
+ * @kind constant
+ * @name DATA_KEYS
+ * @type {Object}
+ */
+const DATA_KEYS = {
+  options: `${PLUGIN_IDENTIFIER}.options-001`,
+  translations: `${PLUGIN_IDENTIFIER}.translations-001`,
+  originalText: `${PLUGIN_IDENTIFIER}.original-text-001`,
+};
+
+/**
  * @description An object containing the current string constants the Figma API returns for
  * top-level (`main`) layer and `group` layer types.
  *
@@ -30,12 +46,17 @@ const PLUGIN_NAME = 'Exonym';
  * @type {Object}
  */
 const FRAME_TYPES = {
-  main: 'FRAME',
   group: 'GROUP',
+  main: 'FRAME',
 };
 
-/** WIP
- * @description An object containing `height`/`width` settings for the plugin GUI window.
+/**
+ * @description An array of languages offered in the plugin for translation. The list is split
+ * into two groups: `addl` and `core`. Core languages are listed first in the translation
+ * menus. Languages are listed in the order that they appear in this array. Each language should
+ * contain a `name`, an `id` that corresponds to the ID used in the Microsoft Translator API,
+ * and the afforementioned `group`. If the language contains characters that are not widely
+ * supported by all typefaces, you may also provide a `font`, formatted like Figma’s `FontName`.
  *
  * @kind constant
  * @name LANGUAGES
@@ -61,7 +82,7 @@ const LANGUAGES: Array<{
   },
   {
     name: 'Chinese (Traditional)',
-    id: 'zh-CHT',
+    id: 'zh-Hant',
     font: {
       family: 'Hiragino Kaku Gothic Pro',
       style: 'W3',
@@ -70,7 +91,7 @@ const LANGUAGES: Array<{
   },
   {
     name: 'Chinese (Simplified)',
-    id: 'zh-CHS',
+    id: 'zh-Hans',
     font: {
       family: 'Hiragino Kaku Gothic Pro',
       style: 'W3',
@@ -100,6 +121,12 @@ const LANGUAGES: Array<{
     id: 'en',
     font: null,
     group: 'core',
+  },
+  {
+    name: 'Filipino / Tagalog',
+    id: 'fil',
+    font: null,
+    group: 'addl',
   },
   {
     name: 'French',
@@ -132,6 +159,12 @@ const LANGUAGES: Array<{
       family: 'Hiragino Kaku Gothic Pro',
       style: 'W3',
     },
+    group: 'addl',
+  },
+  {
+    name: 'Klingon',
+    id: 'tlh',
+    font: null,
     group: 'addl',
   },
   {
@@ -192,12 +225,6 @@ const LANGUAGES: Array<{
     group: 'addl',
   },
   {
-    name: 'Turkish',
-    id: 'tr',
-    font: null,
-    group: 'addl',
-  },
-  {
     name: 'Thai',
     id: 'th',
     font: {
@@ -205,6 +232,12 @@ const LANGUAGES: Array<{
       style: 'Regular',
     },
     group: 'core',
+  },
+  {
+    name: 'Turkish',
+    id: 'tr',
+    font: null,
+    group: 'addl',
   },
 ];
 
@@ -220,36 +253,18 @@ const GUI_SETTINGS = {
     width: 200,
     height: 326,
   },
-  input: {
+  info: {
     width: 440,
     height: 145,
   },
 };
 
-/**
- * @description An object containing the sets of typefaces in-use by the plugin.
- *
- * @kind constant
- * @name TYPEFACES
- * @type {Object}
- */
-const TYPEFACES = {
-  primary: {
-    family: 'Helvetica Neue',
-    style: 'Regular',
-  },
-  secondary: {
-    family: 'Roboto',
-    style: 'Regular',
-  },
-};
-
 export {
+  DATA_KEYS,
   FRAME_TYPES,
   GUI_SETTINGS,
   LANGUAGES,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
-  TYPEFACES,
 };
 /* eslint-enable import/prefer-default-export */
