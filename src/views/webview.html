@@ -1,3 +1,97 @@
-<div class="container">
-  <h1>Hello, I am Exonym</h1>  
+<div class="container padding">
+  <section class="options" id="action-options">
+    <h2>
+      Language
+    </h2>
+    <p class="select">
+      <label>
+        Language
+      </label>
+      <select id="languages" class="select-menu">
+      </select>
+    </p>
+    <h3>
+      Options
+    </h3>
+    <ul>
+      <li class="radio">
+        <input
+          class="radio__button"
+          type="radio"
+          name="text-action"
+          value="replace"
+          id="text-replace"
+        >
+        <label
+          class="radio__label"
+          for="text-replace"
+        >
+          Replace existing text
+        </label>
+      </li>
+      <li class="radio">
+        <input
+          class="radio__button"
+          type="radio"
+          name="text-action"
+          value="duplicate"
+          id="text-duplicate"
+          checked
+        >
+        <label
+          class="radio__label"
+          for="text-duplicate"
+        >
+          Duplicate selected layers
+        </label>
+      </li>
+      <li class="radio">
+        <input
+          class="radio__button"
+          type="radio"
+          name="text-action"
+          value="new-page"
+          id="text-new-page"
+        >
+        <label
+          class="radio__label"
+          for="text-new-page"
+        >
+          Create a new page
+        </label>
+      </li>
+    </ul>
+    <p class="switch">
+      <input
+        class="switch__toggle"
+        id="translate-locked"
+        name="translate-locked"
+        type="checkbox"
+        value="translate-locked"
+      >
+      <label
+        class="switch__label"
+        for="translate-locked"
+      >
+        Translate locked layers
+      </label>
+    </p>
+  </section>
+  <footer id="actions">
+    <span class="mark">
+      <svg viewBox="0 0 26 32">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M0 13.6316C0 6.65535 5.8203 1 13 1C20.1797 1 26 6.65535 26 13.6316C26 20.6078 20.1797 26.2631 13 26.2631H6.5L0 30.4737V13.6316Z" fill="#ff3399"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.875 21C4.875 16.6399 8.51269 13.1053 13 13.1053C17.4873 13.1053 21.125 16.6399 21.125 21C21.125 25.3601 17.4873 28.8947 13 28.8947H9.20833L4.875 31V21Z" fill="#3399ff"/>
+        <path d="M7.04159 16.2631C9.43482 16.2631 11.3749 14.378 11.3749 12.0526C11.3749 9.7272 9.43482 7.84209 7.04159 7.84209C4.64835 7.84209 2.70825 9.7272 2.70825 12.0526C2.70825 14.378 4.64835 16.2631 7.04159 16.2631Z" fill="white"/>
+        <path d="M7.04175 13.6316C7.93921 13.6316 8.66675 12.9246 8.66675 12.0526C8.66675 11.1806 7.93921 10.4737 7.04175 10.4737C6.14429 10.4737 5.41675 11.1806 5.41675 12.0526C5.41675 12.9246 6.14429 13.6316 7.04175 13.6316Z" fill="#3399ff"/>
+        <path d="M18.9583 16.2631C21.3516 16.2631 23.2917 14.378 23.2917 12.0526C23.2917 9.7272 21.3516 7.84209 18.9583 7.84209C16.5651 7.84209 14.625 9.7272 14.625 12.0526C14.625 14.378 16.5651 16.2631 18.9583 16.2631Z" fill="white"/>
+        <path d="M18.9583 13.6316C19.8557 13.6316 20.5833 12.9246 20.5833 12.0526C20.5833 11.1806 19.8557 10.4737 18.9583 10.4737C18.0608 10.4737 17.3333 11.1806 17.3333 12.0526C17.3333 12.9246 18.0608 13.6316 18.9583 13.6316Z" fill="#3399ff"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M13.0001 22.0526C15.3933 22.0526 17.3334 20.1675 17.3334 17.8421C13.7223 17.8421 8.66675 17.8421 8.66675 17.8421C8.66675 20.1675 10.6068 22.0526 13.0001 22.0526Z" fill="white"/>
+      </svg>
+
+    </span>
+    <button class="button button--primary" id="submit">
+      Translate
+    </button>
+  </footer>
 </div>
