@@ -1,45 +1,38 @@
-import {
-  findTopFrame,
-  isTextNode,
-  updateArray,
-} from './Tools';
+import { isTextNode, updateArray } from './Tools';
 import { DATA_KEYS, LANGUAGES } from './constants';
-
-// --- private functions for drawing/positioning annotation elements in the Figma file
-// TKTK
-
 
 // --- main Painter class function
 /**
- * @description A class to add elements directly onto Figma file frames.
+ * @description A class to manipulate elements directly in the Figma file.
  *
  * @class
  * @name Painter
  *
  * @constructor
  *
- * @property layer The SceneNode in the Figma file that we want to annotate or modify.
- * @property frame The top-level FrameNode in the Figma file that we want to annotate or modify.
- * @property page The PageNode in the Figma file containing the corresponding `frame` and `layer`.
+ * @property node The SceneNode in the Figma file that we want to annotate or modify.
+ * @property page The page (`PageNode`) containing the corresponding `frame`, `node`,
+ * and `textLayer`.
+ * @property textLayer A text node (`TextNode`) to manipulate.
  */
 export default class Painter {
-  layer: SceneNode;
-  frame?: FrameNode;
+  node: SceneNode;
   page: PageNode;
   textLayer: TextNode;
-  constructor({ for: layer, in: page }) {
-    this.layer = layer;
-    this.textLayer = isTextNode(this.layer) ? this.layer : null;
-    this.frame = findTopFrame(this.layer);
+  constructor({ for: node, in: page }) {
+    this.node = node;
+    this.textLayer = isTextNode(this.node) ? this.node : null;
     this.page = page;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
+  /**
+   * @description Duplicates a node and, by default, places it near the original node. If
+   a `newPage` node is passed, the duplicated `SceneNode` will be placed on a new page.
    *
    * @kind function
    * @name duplicate
+   *
+   * @param {Object} newPage A page node (`PageNode`) to move the duplicated node to (optional).
    *
    * @returns {Object} A result object container success/error status and log/toast messages.
    */
@@ -60,22 +53,22 @@ export default class Painter {
       },
     };
 
-    // set up initial layer spacing
+    // set up initial node spacing
     let spacingBuffer: number = 56;
-    if ((this.layer.height / (1.5)) < spacingBuffer) {
-      spacingBuffer = (this.layer.height / (1.5));
+    if ((this.node.height / (1.5)) < spacingBuffer) {
+      spacingBuffer = (this.node.height / (1.5));
     }
 
     // create text node + update characters and typeface
-    const newNode: SceneNode = this.layer.clone();
-    newPage ? newPage.appendChild(newNode) : this.layer.parent.appendChild(newNode);
+    const newNode: SceneNode = this.node.clone();
+    newPage ? newPage.appendChild(newNode) : this.node.parent.appendChild(newNode);
 
-    // force unlock - no one expects new layers to be locked
+    // force unlock - no one expects new nodes to be locked
     newNode.locked = false;
 
     // placement
-    newNode.x = this.layer.x + spacingBuffer;
-    newNode.y = this.layer.y + spacingBuffer;
+    newNode.x = this.node.x + spacingBuffer;
+    newNode.y = this.node.y + spacingBuffer;
     result.node = newNode;
 
     // return a successful result
@@ -83,92 +76,9 @@ export default class Painter {
     return result;
   }
 
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
-   *
-   * @kind function
-   * @name duplicateText
-   *
-   * @returns {Object} A result object container success/error status and log/toast messages.
-   */
-  duplicateText() {
-    const result: {
-      status: 'error' | 'success',
-      messages: {
-        toast: string,
-        log: string,
-      },
-    } = {
-      status: null,
-      messages: {
-        toast: null,
-        log: null,
-      },
-    };
-
-    // load list of translations for the layer from Settings
-    const existingTranslations = JSON.parse(this.layer.getPluginData(DATA_KEYS.translations));
-
-    // if there are no translations, return with error
-    if (!existingTranslations) {
-      result.status = 'error';
-      result.messages.log = 'Layer is missing translations';
-      return result;
-    }
-
-    // isolate the translations that need to be added
-    // only unpainted items should be drawn
-    const unpaintedTranslations = existingTranslations.filter(translation => !translation.painted);
-    let updatedTranslations = existingTranslations;
-
-    // set up initial layer spacing
-    let spacingBuffer: number = 56;
-    if ((this.layer.height / (1.5)) < spacingBuffer) {
-      spacingBuffer = (this.layer.height / (1.5));
-    }
-    let currentSpacingBuffer = spacingBuffer;
-
-    // clone the initial layer and update the text with the translation
-    unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
-      const updatedCharacters: string = translation.text;
-      const languageConstant = LANGUAGES.find(language => language.id === translation.to);
-      const languageTypeface = languageConstant.font;
-
-      // create text node + update characters and typeface
-      const newTextNode: TextNode = this.textLayer.clone();
-      if (languageTypeface) {
-        newTextNode.fontName = languageTypeface;
-      }
-      newTextNode.characters = updatedCharacters;
-
-      // force unlock
-      newTextNode.locked = false;
-
-      // placement
-      newTextNode.x = this.layer.x + currentSpacingBuffer;
-      newTextNode.y = this.layer.y + currentSpacingBuffer;
-      newTextNode.name = `${translation.to}: ${newTextNode.name}`;
-      this.layer.parent.appendChild(newTextNode);
-
-      currentSpacingBuffer += spacingBuffer;
-
-      // flip the painted flag + update the overall array
-      translation.painted = true; // eslint-disable-line no-param-reassign
-      updatedTranslations = updateArray(updatedTranslations, translation, 'to');
-    });
-
-    // commit updated list of translations to Settings
-    this.layer.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
-
-    // return a successful result
-    result.status = 'success';
-    return result;
-  }
-
-  /** WIP
-   * @description Locates annotation text in a layer’s Settings object and
-   * builds the visual annotation on the Figma frame.
+  /**
+   * @description Retrieves unpainted translation(s) from a node’s data, updates the `textNode`
+   * characters to match, and updates the node data to mark the translation(s) as painted.
    *
    * @kind function
    * @name replaceText
@@ -190,9 +100,9 @@ export default class Painter {
       },
     };
 
-    // load list of translations for the layer from Settings
+    // load list of translations for the node from Settings
     const existingTranslations = JSON.parse(
-      this.layer.getPluginData(DATA_KEYS.translations) || null,
+      this.node.getPluginData(DATA_KEYS.translations) || null,
     );
 
     // if there are no translations, return with error
@@ -207,7 +117,7 @@ export default class Painter {
     const unpaintedTranslations = existingTranslations.filter(translation => !translation.painted);
     let updatedTranslations = existingTranslations;
 
-    // update the layer’s text with the translation
+    // update the node’s text with the translation
     unpaintedTranslations.filter(translation => !translation.painted).forEach((translation) => {
       // select the node to update
       const textNode: TextNode = this.textLayer;
@@ -245,7 +155,7 @@ export default class Painter {
       translation.painted = true; // eslint-disable-line no-param-reassign
       updatedTranslations = updateArray(updatedTranslations, translation, 'to');
 
-      // update layer settings with a new originalText
+      // update node settings with a new originalText
       const newOriginalText: {
         text: string,
         from: string,
@@ -261,7 +171,7 @@ export default class Painter {
     });
 
     // commit updated list of translations to Settings
-    this.layer.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
+    this.node.setPluginData(DATA_KEYS.translations, JSON.stringify(updatedTranslations));
 
     // return a successful result
     result.status = 'success';
