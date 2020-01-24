@@ -32,9 +32,9 @@ const PLUGIN_NAME = 'Exonym';
  * @type {Object}
  */
 const DATA_KEYS = {
-  options: `${PLUGIN_IDENTIFIER}.options-01`,
-  translations: `${PLUGIN_IDENTIFIER}.translations-01`,
-  originalText: `${PLUGIN_IDENTIFIER}.original-text-01`,
+  options: `${PLUGIN_IDENTIFIER}.options-001`,
+  translations: `${PLUGIN_IDENTIFIER}.translations-001`,
+  originalText: `${PLUGIN_IDENTIFIER}.original-text-001`,
 };
 
 /**
@@ -50,8 +50,13 @@ const FRAME_TYPES = {
   main: 'FRAME',
 };
 
-/** WIP
- * @description An object containing `height`/`width` settings for the plugin GUI window.
+/**
+ * @description An array of languages offered in the plugin for translation. The list is split
+ * into two groups: `addl` and `core`. Core languages are listed first in the translation
+ * menus. Languages are listed in the order that they appear in this array. Each language should
+ * contain a `name`, an `id` that corresponds to the ID used in the Microsoft Translator API,
+ * and the afforementioned `group`. If the language contains characters that are not widely
+ * supported by all typefaces, you may also provide a `font`, formatted like Figma’s `FontName`.
  *
  * @kind constant
  * @name LANGUAGES
@@ -116,6 +121,12 @@ const LANGUAGES: Array<{
     id: 'en',
     font: null,
     group: 'core',
+  },
+  {
+    name: 'Filipino / Tagalog',
+    id: 'fil',
+    font: null,
+    group: 'addl',
   },
   {
     name: 'French',
@@ -214,12 +225,6 @@ const LANGUAGES: Array<{
     group: 'addl',
   },
   {
-    name: 'Turkish',
-    id: 'tr',
-    font: null,
-    group: 'addl',
-  },
-  {
     name: 'Thai',
     id: 'th',
     font: {
@@ -227,6 +232,12 @@ const LANGUAGES: Array<{
       style: 'Regular',
     },
     group: 'core',
+  },
+  {
+    name: 'Turkish',
+    id: 'tr',
+    font: null,
+    group: 'addl',
   },
 ];
 
@@ -248,24 +259,6 @@ const GUI_SETTINGS = {
   },
 };
 
-/**
- * @description An object containing the sets of typefaces in-use by the plugin.
- *
- * @kind constant
- * @name TYPEFACES
- * @type {Object}
- */
-const TYPEFACES = {
-  primary: {
-    family: 'Helvetica Neue',
-    style: 'Regular',
-  },
-  secondary: {
-    family: 'Roboto',
-    style: 'Regular',
-  },
-};
-
 export {
   DATA_KEYS,
   FRAME_TYPES,
@@ -273,6 +266,5 @@ export {
   LANGUAGES,
   PLUGIN_IDENTIFIER,
   PLUGIN_NAME,
-  TYPEFACES,
 };
 /* eslint-enable import/prefer-default-export */

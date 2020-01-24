@@ -23,6 +23,43 @@ const sendLoadedMsg = (): void => {
 };
 
 /**
+ * @description Manipulates the webview DOM to set the visual button state.
+ *
+ * @kind function
+ * @name setButtonState
+ *
+ * @param {('ready' | 'working')} action String representing the state to show.
+ * @param {Object} button An optional button DOM element.
+ *
+ * @returns {null}
+ */
+const setButtonState = (
+  action: 'ready' | 'working' = 'ready',
+  button?: HTMLButtonElement,
+) => {
+  // define the button
+  let buttonElement: HTMLButtonElement = null;
+  if (!button) {
+    buttonElement = (<HTMLButtonElement> document.getElementById('submit'));
+  } else {
+    buttonElement = button;
+  }
+
+  // update the button
+  if (buttonElement) {
+    if (action === 'working') {
+      buttonElement.innerHTML = 'Working…';
+      buttonElement.classList.add('working');
+    } else {
+      buttonElement.innerHTML = 'Translate';
+      buttonElement.classList.remove('working');
+    }
+  }
+
+  return null;
+};
+
+/**
  * @description Populates the `languages` <select> menu with a list of languages
  * in the constants (LANGUAGES).
  *
@@ -59,22 +96,19 @@ const initLanguages = (): void => {
 
     // add additional options to group
     addlLanguages.forEach(language => addOption(language, addlOptGroupElement));
-
-    // set up the Figma version
-    selectMenu.init({ position: 'overlap' });
   }
 
   return null;
 };
 
-/** WIP
- * @description Compiles the plugin’s options form elements into an object formatted for
- * consumption in the main thread.
+/**
+ * @description Compiles the plugin options form elements in the webview DOM into an object
+ * formatted for consumption in the main thread.
  *
  * @kind function
  * @name readOptions
  *
- * @returns {Object} option Includes an array of languages to translate, the action to take
+ * @returns {Object} Includes an array of languages to translate, the action to take
  * on the text blocks, and whether or not to ignore locked layers.
  */
 const readOptions = () => {
@@ -109,12 +143,19 @@ const watchActions = (): void => {
   if (actionsElement) {
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLTextAreaElement;
-      const button = target.closest('button');
+      const button: HTMLButtonElement = target.closest('button');
       if (button) {
         // find action by element id
         const action = button.id;
 
-        if (action === 'submit') {
+        if (
+          action === 'submit'
+          && !button.classList.contains('working')
+        ) {
+          // GUI - show we are working
+          setButtonState('working', button);
+
+          // read the form options
           const payload = readOptions();
 
           // bubble action to main
@@ -136,18 +177,19 @@ const watchActions = (): void => {
 
 /* process Messages from the plugin */
 
-/** WIP
- * @description Compiles the plugin’s options form elements into an object formatted for
- * consumption in the main thread.
+/**
+ * @description Sets the plugin’s form elements in the webview DOM to the correct options.
  *
  * @kind function
  * @name setOptions
  *
- * @returns {Object} option Includes an array of languages to translate, the action to take
+ * @param {Object} options Should include an array of languages to translate, the action to take
  * on the text blocks, and whether or not to ignore locked layers.
+ *
+ * @returns {null}
  */
 const setOptions = (options: {
-  action: 'duplicate' | 'replace',
+  action: 'duplicate' | 'replace' | 'new-page',
   translateLocked: boolean,
   languages: Array<string>,
 }): void => {
@@ -156,7 +198,7 @@ const setOptions = (options: {
   // remove the Figma version so it can be reset
   // the figma-select-menu make a <select> clone, so it must be removed before selecting
   // the menu from the DOM
-  selectMenu.destroy();
+  selectMenu.destroy({ selector: 'select-menu' });
 
   const languageIndex = 0; // currently GUI only supports 1 language at a time; take first
   const language = languages[languageIndex];
@@ -173,7 +215,7 @@ const setOptions = (options: {
     }
 
     // set the Figma version of the menu
-    selectMenu.init({ position: 'overlap' });
+    selectMenu.init({ selector: 'select-menu', position: 'overlap' });
   }
 
   if (textActionElement) {
@@ -184,7 +226,10 @@ const setOptions = (options: {
     translateLockedElement.checked = translateLocked;
   }
 
+  // tell the main thread that the plugin has loaded
   sendLoadedMsg();
+
+  return null;
 };
 
 /**
@@ -216,6 +261,9 @@ const watchIncomingMessages = (): void => {
       case 'setOptions':
         setOptions(pluginMessage.payload);
         break;
+      case 'resetState':
+        setButtonState('ready');
+        break;
       default:
         return null;
     }
@@ -223,7 +271,6 @@ const watchIncomingMessages = (): void => {
     return null;
   };
 };
-
 
 // init GUI
 watchActions();

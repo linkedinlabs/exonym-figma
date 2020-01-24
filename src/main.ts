@@ -56,7 +56,7 @@ const dispatcher = async (action: {
 
     // retrieve existing options
     const lastUsedOptions: {
-      action: 'duplicate' | 'replace',
+      action: 'duplicate' | 'replace' | 'new-page',
       translateLocked: boolean,
       languages: Array<string>,
     } = await figma.clientStorage.getAsync(DATA_KEYS.options);
@@ -68,7 +68,7 @@ const dispatcher = async (action: {
       // set preliminary options
       const options: {
         languages: Array<string>,
-        action: 'duplicate' | 'replace',
+        action: 'duplicate' | 'replace' | 'new-page',
         translateLocked: boolean,
       } = {
         languages: [language],
@@ -113,12 +113,12 @@ const dispatcher = async (action: {
 
     switch (type) {
       case 'submit':
-        app.translate(payload, true);
+        app.runTranslate(payload, true);
         break;
       case String(type.match(/^quick-translate-.*/)):
         if (verifyQuickType(type)) {
           setTranslatePayload(type);
-          app.translate(quickTranslatePayload, false);
+          app.runTranslate(quickTranslatePayload, false);
         }
         break;
       default:
