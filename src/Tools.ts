@@ -113,6 +113,10 @@ const asyncNetworkRequest = async (options: {
         bodyToSend,
       },
     });
+
+    if (messenger) {
+      messenger.log(`Network request: ${requestUrl}`);
+    }
   };
 
   // do the things
