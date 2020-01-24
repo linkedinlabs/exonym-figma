@@ -1,4 +1,4 @@
-// Figma Plugin API version 1, update 7
+// Figma Plugin API version 1, update 8
 
 declare global {
 // Vendor Declarations
@@ -73,7 +73,7 @@ interface PluginAPI {
   createImage(data: Uint8Array): Image
   getImageByHash(hash: string): Image
 
-  group(nodes: ReadonlyArray<BaseNode>, parent: BaseNode & ChildrenMixin, index?: number): FrameNode
+  group(nodes: ReadonlyArray<BaseNode>, parent: BaseNode & ChildrenMixin, index?: number): GroupNode
   flatten(nodes: ReadonlyArray<BaseNode>, parent?: BaseNode & ChildrenMixin, index?: number): VectorNode
 
   union(nodes: ReadonlyArray<BaseNode>, parent: BaseNode & ChildrenMixin, index?: number): BooleanOperationNode
@@ -483,16 +483,13 @@ interface BlendMixin {
   effectStyleId: string
 }
 
-interface FrameMixin {
-  backgrounds: ReadonlyArray<Paint>
+interface ContainerMixin {
+  backgrounds: ReadonlyArray<Paint> // DEPRECATED: use 'fills' instead
   layoutGrids: ReadonlyArray<LayoutGrid>
   clipsContent: boolean
   guides: ReadonlyArray<Guide>
   gridStyleId: string
-  backgroundStyleId: string
-
-  overflowDirection: OverflowDirection // PROPOSED API ONLY
-  numberOfFixedChildren: number // PROPOSED API ONLY
+  backgroundStyleId: string // DEPRECATED: use 'fillStyleId' instead
 }
 
 type StrokeCap = "NONE" | "ROUND" | "SQUARE" | "ARROW_LINES" | "ARROW_EQUILATERAL"
@@ -516,6 +513,13 @@ interface CornerMixin {
   cornerSmoothing: number
 }
 
+interface RectangleCornerMixin {
+  topLeftRadius: number
+  topRightRadius: number
+  bottomLeftRadius: number
+  bottomRightRadius: number
+}
+
 interface ExportMixin {
   exportSettings: ReadonlyArray<ExportSettings>
   exportAsync(settings?: ExportSettings): Promise<Uint8Array> // Defaults to PNG format
@@ -530,10 +534,14 @@ interface DefaultShapeMixin extends
   BlendMixin, GeometryMixin, LayoutMixin, ExportMixin {
 }
 
-interface DefaultContainerMixin extends
+interface DefaultFrameMixin extends
   BaseNodeMixin, SceneNodeMixin, ReactionMixin,
-  ChildrenMixin, FrameMixin,
+  ChildrenMixin, ContainerMixin,
+  GeometryMixin, CornerMixin, RectangleCornerMixin,
   BlendMixin, ConstraintMixin, LayoutMixin, ExportMixin {
+
+  overflowDirection: OverflowDirection // PROPOSED API ONLY
+  numberOfFixedChildren: number // PROPOSED API ONLY
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,12 +568,17 @@ interface PageNode extends BaseNodeMixin, ChildrenMixin, ExportMixin {
 
   backgrounds: ReadonlyArray<Paint>
 
-  readonly prototypeStartNode: FrameNode | ComponentNode | InstanceNode | null // PROPOSED API ONLY
+  readonly prototypeStartNode: FrameNode | GroupNode | ComponentNode | InstanceNode | null // PROPOSED API ONLY
 }
 
-interface FrameNode extends DefaultContainerMixin {
-  readonly type: "FRAME" | "GROUP"
+interface FrameNode extends DefaultFrameMixin {
+  readonly type: "FRAME"
   clone(): FrameNode
+}
+
+interface GroupNode extends BaseNodeMixin, SceneNodeMixin, ReactionMixin, ChildrenMixin, ContainerMixin, BlendMixin, LayoutMixin, ExportMixin {
+  readonly type: "GROUP"
+  clone(): GroupNode
 }
 
 interface SliceNode extends BaseNodeMixin, SceneNodeMixin, LayoutMixin, ExportMixin {
@@ -573,13 +586,9 @@ interface SliceNode extends BaseNodeMixin, SceneNodeMixin, LayoutMixin, ExportMi
   clone(): SliceNode
 }
 
-interface RectangleNode extends DefaultShapeMixin, ConstraintMixin, CornerMixin {
+interface RectangleNode extends DefaultShapeMixin, ConstraintMixin, CornerMixin, RectangleCornerMixin {
   readonly type: "RECTANGLE"
   clone(): RectangleNode
-  topLeftRadius: number
-  topRightRadius: number
-  bottomLeftRadius: number
-  bottomRightRadius: number
 }
 
 interface LineNode extends DefaultShapeMixin, ConstraintMixin {
@@ -654,7 +663,7 @@ interface TextNode extends DefaultShapeMixin, ConstraintMixin {
   setRangeFillStyleId(start: number, end: number, value: string): void
 }
 
-interface ComponentNode extends DefaultContainerMixin {
+interface ComponentNode extends DefaultFrameMixin {
   readonly type: "COMPONENT"
   clone(): ComponentNode
 
@@ -664,7 +673,7 @@ interface ComponentNode extends DefaultContainerMixin {
   readonly key: string // The key to use with "importComponentByKeyAsync"
 }
 
-interface InstanceNode extends DefaultContainerMixin  {
+interface InstanceNode extends DefaultFrameMixin  {
   readonly type: "INSTANCE"
   clone(): InstanceNode
   masterComponent: ComponentNode
@@ -684,6 +693,7 @@ type BaseNode =
 type SceneNode =
   SliceNode |
   FrameNode |
+  GroupNode |
   ComponentNode |
   InstanceNode |
   BooleanOperationNode |

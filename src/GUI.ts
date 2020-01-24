@@ -96,9 +96,6 @@ const initLanguages = (): void => {
 
     // add additional options to group
     addlLanguages.forEach(language => addOption(language, addlOptGroupElement));
-
-    // set up the Figma version
-    selectMenu.init({ position: 'overlap' });
   }
 
   return null;
@@ -111,7 +108,7 @@ const initLanguages = (): void => {
  * @kind function
  * @name readOptions
  *
- * @returns {Object} options Includes an array of languages to translate, the action to take
+ * @returns {Object} Includes an array of languages to translate, the action to take
  * on the text blocks, and whether or not to ignore locked layers.
  */
 const readOptions = () => {
@@ -201,7 +198,7 @@ const setOptions = (options: {
   // remove the Figma version so it can be reset
   // the figma-select-menu make a <select> clone, so it must be removed before selecting
   // the menu from the DOM
-  selectMenu.destroy();
+  selectMenu.destroy({ selector: 'select-menu' });
 
   const languageIndex = 0; // currently GUI only supports 1 language at a time; take first
   const language = languages[languageIndex];
@@ -218,7 +215,7 @@ const setOptions = (options: {
     }
 
     // set the Figma version of the menu
-    selectMenu.init({ position: 'overlap' });
+    selectMenu.init({ selector: 'select-menu', position: 'overlap' });
   }
 
   if (textActionElement) {
@@ -274,7 +271,6 @@ const watchIncomingMessages = (): void => {
     return null;
   };
 };
-
 
 // init GUI
 watchActions();

@@ -338,20 +338,21 @@ const translateLocal = (options: {
   return { remainingTextNodes };
 };
 
-// --- main Translate class
+// --- main Translator class
 /**
- * @description A class to handle core app logic and dispatch work to other classes.
+ * @description A class to handle the translations requests from the rest of the App. Translator
+ * will convert strings using both the local dictionary and the Microsoft Translate API.
+ * Translation results are set to a node’s data for other classes to access.
  *
  * @class
- * @name App
+ * @name Translator
  *
  * @constructor
  *
- * @property shouldTerminate A boolean that tells us whether or not the GUI should remain open
- * at the end of the plugin’s current task.
- * @property terminatePlugin A convenience function for properly shutting down the plugin.
+ * @property {Array} textNodes An array of text nodes (`TextNode`) to translate.
+ * @property {Object} messenger An initialized instance of the Messenger class for logging.
  */
-export default class App {
+export default class Translator {
   textNodes: Array<TextNode>;
   messenger: { log: Function };
 
@@ -360,13 +361,17 @@ export default class App {
     this.messenger = messenger;
   }
 
-  /** WIP
-   * @description Does a thing.
+  /**
+   * @description Takes an array of languages and sets translated text to the available
+   * text nodes (`TextNode`) in each node’s data.
    *
    * @kind function
    * @name translate
    *
-   * @returns {null} Shows a Toast in the UI if nothing is selected.
+   * @param {Array} targetLanguages An array of languages to target for translation. Languages
+   * should be in `id` form, matching the `LANGUAGES` constant.
+   *
+   * @returns {Object} A result object container success/error status and log/toast messages.
    */
   async translate(targetLanguages: Array<string>) {
     const result: {
