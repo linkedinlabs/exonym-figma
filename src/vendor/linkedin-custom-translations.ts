@@ -1,5 +1,6 @@
-/** WIP
- * @description An object containing `height`/`width` settings for the plugin GUI window.
+/**
+ * @description The list of available translations. The menu in the UI is generated
+ * from this list. Any `id` should correspond to a language id on the Microsoft Translate API.
  *
  * @kind constant
  * @name CUSTOM_TRANSLATIONS
