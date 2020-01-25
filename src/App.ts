@@ -164,6 +164,12 @@ export default class App {
     return null;
   }
 
+  /**
+   * @description Triggers a UI refresh and then displays the plugin UI.
+   *
+   * @kind function
+   * @name showToolbar
+   */
   static showToolbar() {
     const { messenger } = assemble(figma);
 
