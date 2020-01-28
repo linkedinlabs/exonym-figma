@@ -1,7 +1,7 @@
 {
   "name": "exonym-figma",
   "description": "A Figma plugin for easily translating text.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/linkedinlabs/exonym-figma.git"
@@ -36,21 +36,21 @@
     "dotenv-webpack": "^1.7.0",
     "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jsdoc": "^4.8.4",
     "html-loader": "^0.5.1",
     "html-webpack-inline-source-plugin": "0.0.10",
     "html-webpack-plugin": "^3.2.0",
     "lint-staged": "^8.1.5",
     "pre-commit": "^1.2.2",
-    "style-loader": "^1.0.0",
+    "style-loader": "^1.1.3",
     "stylelint": "^10.0.1",
     "stylelint-config-standard": "^18.3.0",
-    "ts-loader": "^6.0.4",
-    "typescript": "^3.5.3",
-    "url-loader": "^2.1.0",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.5",
+    "url-loader": "^2.3.0",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
   },
   "dependencies": {},
   "author": "Grant Blakeman <gblakeman@linkedin.com>"
