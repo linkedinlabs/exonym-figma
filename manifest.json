@@ -120,5 +120,12 @@
       "name": "Run previous translation…",
       "command": "quick-translate-last"
     }
+  ],
+  "relaunchButtons": [
+    {
+      "command": "tools",
+      "name": "Show Exonym",
+      "multipleSelection": true
+    }
   ]
 }
