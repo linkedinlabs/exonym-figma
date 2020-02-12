@@ -42,12 +42,14 @@ const DATA_KEYS = {
  * top-level (`main`) layer and `group` layer types.
  *
  * @kind constant
- * @name FRAME_TYPES
+ * @name CONTAINER_NODE_TYPES
  * @type {Object}
  */
-const FRAME_TYPES = {
+const CONTAINER_NODE_TYPES = {
+  component: 'COMPONENT',
+  frame: 'FRAME',
   group: 'GROUP',
-  main: 'FRAME',
+  instance: 'INSTANCE',
 };
 
 /**
@@ -261,7 +263,7 @@ const GUI_SETTINGS = {
 
 export {
   DATA_KEYS,
-  FRAME_TYPES,
+  CONTAINER_NODE_TYPES,
   GUI_SETTINGS,
   LANGUAGES,
   PLUGIN_IDENTIFIER,

@@ -1,4 +1,4 @@
-import { FRAME_TYPES } from './constants';
+import { CONTAINER_NODE_TYPES } from './constants';
 
 /**
  * @description A class to handle traversing an array of selected items and return useful items
@@ -45,8 +45,8 @@ export default class Crawler {
     // iterate through initial selection
     initialSelection.forEach((node: any) => {
       if (
-        node.type !== FRAME_TYPES.group
-        && node.type !== FRAME_TYPES.main
+        node.type !== CONTAINER_NODE_TYPES.group
+        && node.type !== CONTAINER_NODE_TYPES.frame
       ) {
         // non-frame or -group nodes get added to the final selection
         flatSelection.push(node);
@@ -78,8 +78,8 @@ export default class Crawler {
             },
           ) => {
             if (
-              innerLayer.type !== FRAME_TYPES.group
-              && innerLayer.type !== FRAME_TYPES.main
+              innerLayer.type !== CONTAINER_NODE_TYPES.group
+              && innerLayer.type !== CONTAINER_NODE_TYPES.frame
             ) {
               // non-frame or -group nodes get added to the final selection
               flatSelection.push(innerLayer);

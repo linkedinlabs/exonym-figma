@@ -1,5 +1,5 @@
 import {
-  FRAME_TYPES,
+  CONTAINER_NODE_TYPES,
   GUI_SETTINGS,
   LANGUAGES,
 } from './constants';
@@ -231,13 +231,13 @@ const updateArray = (
 
 /**
  * @description Takes a node object and traverses parent relationships until the top-level
- * `FRAME_TYPES.main` node is found. Returns the frame node.
+ * `CONTAINER_NODE_TYPES.frame` node is found. Returns the frame node.
  *
  * @kind function
  * @name findTopFrame
  * @param {Object} node A Figma node object.
  *
- * @returns {Object} The top-level `FRAME_TYPES.main` node.
+ * @returns {Object} The top-level `CONTAINER_NODE_TYPES.frame` node.
  */
 const findTopFrame = (node: any) => {
   let { parent } = node;
@@ -249,11 +249,86 @@ const findTopFrame = (node: any) => {
 
   // loop through each parent until we find the outermost FRAME
   if (parent) {
-    while (parent && parent.type !== FRAME_TYPES.main) {
+    while (parent && parent.type !== CONTAINER_NODE_TYPES.frame) {
       parent = parent.parent;
     }
   }
   return parent;
+};
+
+/**
+ * @description Reverse iterates the node tree to determine the top-level component instance
+ * (if one exists) for the node. This allows you to easily find a Master Component when dealing
+ * with an instance that may be nested within several component instances.
+ *
+ * @kind function
+ * @name findTopInstance
+ *
+ * @param {Object} node A Figma node object (`SceneNode`).
+ *
+ * @returns {Object} Returns the top component instance (`InstanceNode`) or `null`.
+ */
+const findTopInstance = (node: any) => {
+  let { parent } = node;
+  let currentNode = node;
+  let currentTopInstance: InstanceNode = null;
+
+  if (parent) {
+    // iterate until the parent is a page
+    while (parent && parent.type !== 'PAGE') {
+      currentNode = parent;
+      if (currentNode.type === CONTAINER_NODE_TYPES.instance) {
+        // update the top-most master component with the current one
+        currentTopInstance = currentNode;
+      }
+      parent = parent.parent;
+    }
+  }
+
+  if (currentTopInstance) {
+    return currentTopInstance;
+  }
+  return null;
+};
+
+/**
+ * @description Reverse iterates the node tree to determine the top-level component
+ * (if one exists) for the node. This allows you to check if a node is part of a component.
+ *
+ * @kind function
+ * @name findTopComponent
+ *
+ * @param {Object} node A Figma node object (`SceneNode`).
+ *
+ * @returns {Object} Returns the component (`ComponentNode`) or `null`.
+ */
+const findTopComponent = (node: any) => {
+  // return self if component
+  if (node.type === CONTAINER_NODE_TYPES.component) {
+    return node;
+  }
+
+  let { parent } = node;
+  let currentNode = node;
+  let componentNode: ComponentNode = null;
+  if (parent) {
+    // iterate until the parent is a page or component is found;
+    // components cannot nest inside other components, so we can stop at the first
+    // found component
+    while (parent && parent.type !== 'PAGE' && componentNode === null) {
+      currentNode = parent;
+      if (currentNode.type === CONTAINER_NODE_TYPES.component) {
+        // update the top-most master component with the current one
+        componentNode = currentNode;
+      }
+      parent = parent.parent;
+    }
+  }
+
+  if (componentNode) {
+    return componentNode;
+  }
+  return null;
 };
 
 /**
@@ -367,7 +442,9 @@ export {
   asyncForEach,
   asyncNetworkRequest,
   awaitUIReadiness,
+  findTopComponent,
   findTopFrame,
+  findTopInstance,
   isInternal,
   isTextNode,
   loadTypefaces,
