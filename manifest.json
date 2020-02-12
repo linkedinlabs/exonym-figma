@@ -124,7 +124,7 @@
   "relaunchButtons": [
     {
       "command": "tools",
-      "name": "Show Exonym",
+      "name": "Show Exonym…",
       "multipleSelection": true
     }
   ]

@@ -4,6 +4,8 @@ import Painter from './Painter';
 import Translator from './Translator';
 import {
   awaitUIReadiness,
+  findTopComponent,
+  findTopInstance,
   loadTypefaces,
   readLanguageTypefaces,
   resizeGUI,
@@ -80,6 +82,52 @@ const readTypefaces = (textNodes: Array<TextNode>) => {
   });
 
   return uniqueTypefaces;
+};
+
+/**
+ * @description Invokes Figma’s `setRelaunchData` on the passed node and (if applicable),
+ * the container component node.
+ *
+ * @kind function
+ * @name setRelaunchCommands
+ *
+ * @param {Object} node The node (`SceneNode`) to use with `setRelaunchData`.
+ *
+ * @returns {null}
+ */
+const setRelaunchCommands = (node: SceneNode): void => {
+  const topInstanceNode: InstanceNode = findTopInstance(node);
+
+  // currently cannot apply `setRelaunchData` to a node inside of an `InstanceNode`
+  if (!topInstanceNode) {
+    node.setRelaunchData({
+      tools: '',
+    });
+  }
+
+  // apply to top-level component
+  const componentNode: ComponentNode = findTopComponent(node);
+  if (componentNode && !componentNode.remote) {
+    componentNode.setRelaunchData({
+      tools: '',
+    });
+  }
+
+  // apply to the instance node
+  // (currently not possible - but coming soon)
+  // if (topInstanceNode) {
+  //   topInstanceNode.setRelaunchData({
+  //     'quick-randomize-assigned': GUI_CONTENT.relaunch.component,
+  //   });
+
+  //   if (topInstanceNode.masterComponent && !topInstanceNode.masterComponent.remote) {
+  //     topInstanceNode.masterComponent.setRelaunchData({
+  //       'quick-randomize-assigned': GUI_CONTENT.relaunch.component,
+  //     });
+  //   }
+  // }
+
+  return null;
 };
 
 /**
@@ -234,6 +282,9 @@ export default class App {
         // replace the existing text with the translation
         // TKTK handle error result
         painter.replaceText();
+
+        // set the re-launch commands
+        setRelaunchCommands(textNode);
       });
       messenger.log('End manipulating text');
 
