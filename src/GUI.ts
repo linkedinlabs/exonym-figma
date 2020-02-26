@@ -2,7 +2,6 @@
  * @description A set of functions to operate the plugin GUI.
  */
 import './assets/css/main.scss';
-import './views/webview.css';
 import { makeNetworkRequest } from './Tools';
 import { LANGUAGES } from './constants';
 import './vendor/figma-select-menu';
