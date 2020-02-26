@@ -1,0 +1,91 @@
+// ++++++++++++++++++++++++++++++++++++++++++++++ layout
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  @include type-01;
+  background: $wl-canvas;
+
+  &.blank-state-visible {
+    padding-bottom: 0;
+  }
+}
+
+svg {
+  display: block;
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+
+  .options {
+    display: block;
+    width: 100%;
+  }
+
+  .select {
+    display: block;
+    width: 100%;
+
+    label {
+      display: none;
+    }
+  }
+
+  .switch {
+    margin-top: em(12);
+  }
+
+  .button {
+    &.working {
+      opacity: 0.5;
+    }
+  }
+
+  footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: em(16);
+    width: 100%;
+    height: em(64);
+    background: $wl-canvas;
+
+    .mark {
+      width: 26px;
+      height: 32px;
+    }
+  }
+
+  &.padding {
+    padding: em(16) em(8) em(16) em(8);
+
+    h2, h3, p, ul {
+      padding-left: em(8);
+      padding-right: em(8);
+    }
+
+    p {
+      &.select {
+        padding: 0;
+      }
+    }
+
+    .styled-select {
+      ul {
+        padding: em(8) 0 em(8) 0;
+      }
+    }
+  }
+}
