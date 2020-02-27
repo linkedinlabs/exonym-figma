@@ -16,13 +16,6 @@
   color: $wl-type-02;
 }
 
-@mixin type-03 {
-  @include type-01;
-  font-size: 15px;
-  line-height: 22px;
-  letter-spacing: -0.15;
-}
-
 // force some other weights to pre-load (prevents the flout effect)
 #font-preload {
   @include hide-visually;
