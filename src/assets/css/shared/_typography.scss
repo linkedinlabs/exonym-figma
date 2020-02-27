@@ -19,7 +19,7 @@
 // force some other weights to pre-load (prevents the flout effect)
 #font-preload {
   @include hide-visually;
-  @include type-01(300);
+  @include type-01(400);
 
   em {
     font-style: normal;
@@ -36,6 +36,6 @@ h2, h3 {
 }
 
 h2, h3, p, ul {
-  margin: 0 0 12px 0;
+  margin: 0 0 em(12) 0;
   padding: 0;
 }
