@@ -1,0 +1,79 @@
+// ++++++++++++++++++++++++++++++++++++++++++++++ figma radio
+// a figma-style radio (tries to match Figma’s UI with few modifications)
+// original source: https://www.figma.com/plugin-docs/figma-components/
+// .radio is a custom adaptation of .checkbox
+
+@mixin figma-radio-base {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  height: em(32);
+  @include type-01;
+  letter-spacing: 0.005em;
+  cursor: default;
+}
+
+@mixin figma-radio-button {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+
+  &:checked + label {
+    &:after {
+      content: "";
+      position: absolute;
+      top: em(13);
+      left: em(3);
+      width: em(6);
+      height: em(6);
+      background-color: $wl-ctrl-primary;
+      border-radius: 6px;
+    }
+  }
+
+  &:enabled:focus + label {
+    &:before {
+      border-color: $wl-action-primary;
+    }
+  }
+
+  &:enabled:focus:checked + label {
+    &:after {
+      background-color: $wl-action-primary;
+    }
+  }
+
+  &:disabled + label {
+    opacity: 0.3;
+  }
+
+  &:checked:disabled + label {
+    &:before {
+      border: 1px solid rgba($wl-ctrl-primary, 0.8);
+      background-color: rgba($wl-ctrl-primary, 0.8);
+    }
+  }
+}
+
+@mixin figma-radio-label {
+  display: flex;
+  width: 100%;
+  user-select: none;
+
+  &:before {
+    content: "";
+    display: block;
+    margin: em(2) em(10) 0 0;
+    width: em(10);
+    height: em(10);
+    border: 1px solid rgba($wl-ctrl-primary, 0.8);
+    border-radius: 10px;
+  }
+}
+
+.radio { @include figma-radio-base; }
+.radio__button { @include figma-radio-button; }
+.radio__label { @include figma-radio-label; }
