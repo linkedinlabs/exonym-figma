@@ -3,7 +3,7 @@ import {
   asyncNetworkRequest,
   updateArray,
 } from './Tools';
-import { DATA_KEYS } from './constants';
+import { DATA_KEYS, LANGUAGES } from './constants';
 
 // for custom translations
 import CUSTOM_TRANSLATIONS from './vendor/linkedin-custom-translations';
@@ -28,8 +28,23 @@ const readText = (textNodes: Array<TextNode>): Array<{
   }> = [];
 
   textNodes.forEach((textNode: TextNode) => {
+    // default is to use the current `characters` from the node
+    let nodeText = textNode.characters;
+
+    // check for originalText and carve out exception for RTL languages
+    const originalText = JSON.parse(textNode.getPluginData(DATA_KEYS.originalText) || null);
+    if (originalText && originalText.text && originalText.from) {
+      const languageConstant = LANGUAGES.find(language => language.id === originalText.from);
+      // if language is “rtl”, use the `originalText` entry because the
+      // node’s `characters` will be corrupt
+      if (languageConstant && languageConstant.direction === 'rtl') {
+        nodeText = originalText.text;
+      }
+    }
+
+    // add text to translation list
     textToTranslate.push({
-      text: textNode.characters,
+      text: nodeText,
     });
   });
 
