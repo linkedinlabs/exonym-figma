@@ -1,6 +1,34 @@
 import { isTextNode, updateArray } from './Tools';
 import { DATA_KEYS, LANGUAGES } from './constants';
 
+// --- private functions
+const reverseRTLLang = (text: string): string => {
+  const isAlphanumeric = (testString: string) => {
+    const firstCharIndex = 0;
+    const firstChar = testString[firstCharIndex];
+
+    if (firstChar.replace(/[^a-z0-9]/gi, '') === '') {
+      return false;
+    }
+    return true;
+  };
+
+  const reverseString = require('reverse-string'); // eslint-disable-line global-require
+  const textAsArray = text.split(' ');
+  const reversedArray = [];
+
+  textAsArray.forEach((word) => {
+    if (!isAlphanumeric(word)) {
+      reversedArray.push(reverseString(word));
+    } else {
+      reversedArray.push(word);
+    }
+  });
+
+  const reversedString = reversedArray.reverse().join(' ');
+  return reversedString;
+};
+
 // --- main Painter class function
 /**
  * @description A class to manipulate elements directly in the Figma file.
@@ -149,7 +177,15 @@ export default class Painter {
       if (languageTypeface) {
         textNode.fontName = languageTypeface;
       }
-      textNode.characters = updatedCharacters;
+
+      // Figma does not support right-to-left languages, so we need to manually
+      // reverse the characters to make them appear correctly
+      if (languageConstant.direction === 'rtl') {
+        textNode.characters = reverseRTLLang(updatedCharacters);
+        textNode.name = updatedCharacters;
+      } else {
+        textNode.characters = updatedCharacters;
+      }
 
       // flip the painted flag + update the overall array
       translation.painted = true; // eslint-disable-line no-param-reassign

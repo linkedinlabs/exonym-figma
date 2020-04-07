@@ -59,6 +59,8 @@
     "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10"
   },
-  "dependencies": {},
+  "dependencies": {
+    "reverse-string": "0.0.6"
+  },
   "author": "Grant Blakeman <gblakeman@linkedin.com>"
 }
