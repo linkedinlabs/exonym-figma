@@ -62,7 +62,7 @@ const CONTAINER_NODE_TYPES = {
  *
  * @kind constant
  * @name LANGUAGES
- * @type {Object}
+ * @type {Array}
  */
 const LANGUAGES: Array<{
   name: string,
