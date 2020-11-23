@@ -96,14 +96,10 @@ const readTypefaces = (textNodes: Array<TextNode>) => {
  * @returns {null}
  */
 const setRelaunchCommands = (node: SceneNode): void => {
-  const topInstanceNode: InstanceNode = findTopInstance(node);
-
   // currently cannot apply `setRelaunchData` to a node inside of an `InstanceNode`
-  if (!topInstanceNode) {
-    node.setRelaunchData({
-      tools: '',
-    });
-  }
+  node.setRelaunchData({
+    tools: '',
+  });
 
   // apply to top-level component
   const componentNode: ComponentNode = findTopComponent(node);
@@ -114,18 +110,18 @@ const setRelaunchCommands = (node: SceneNode): void => {
   }
 
   // apply to the instance node
-  // (currently not possible - but coming soon)
-  // if (topInstanceNode) {
-  //   topInstanceNode.setRelaunchData({
-  //     'quick-randomize-assigned': GUI_CONTENT.relaunch.component,
-  //   });
+  const topInstanceNode: InstanceNode = findTopInstance(node);
+  if (topInstanceNode) {
+    node.setRelaunchData({
+      tools: '',
+    });
 
-  //   if (topInstanceNode.masterComponent && !topInstanceNode.masterComponent.remote) {
-  //     topInstanceNode.masterComponent.setRelaunchData({
-  //       'quick-randomize-assigned': GUI_CONTENT.relaunch.component,
-  //     });
-  //   }
-  // }
+    if (topInstanceNode.masterComponent && !topInstanceNode.masterComponent.remote) {
+      topInstanceNode.masterComponent.setRelaunchData({
+        tools: '',
+      });
+    }
+  }
 
   return null;
 };
