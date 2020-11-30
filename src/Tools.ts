@@ -244,12 +244,12 @@ const findTopFrame = (node: any) => {
 
   // if the parent is a page, we're done
   if (parent && parent.type === 'PAGE') {
-    return parent;
+    return node;
   }
 
   // loop through each parent until we find the outermost FRAME
   if (parent) {
-    while (parent && parent.type !== CONTAINER_NODE_TYPES.frame) {
+    while (parent && parent.parent.type !== 'PAGE') {
       parent = parent.parent;
     }
   }
